@@ -30,6 +30,19 @@
                     </archive>
                 </configuration>
             </plugin>
+            <!-- Analisis estatico: ./mvnw pmd:pmd genera target/reports/pmd.html y target/pmd.xml -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.26.0</version>
+                <configuration>
+                    <rulesets>
+                        <ruleset>config/pmd/reglas-diseno.xml</ruleset>
+                    </rulesets>
+                    <printFailingErrors>true</printFailingErrors>
+                    <linkXRef>false</linkXRef>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

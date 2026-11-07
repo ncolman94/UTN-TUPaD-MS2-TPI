@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="Reglas de diseno - TPI MS II"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+    <description>
+        Reglas elegidas para detectar los code smells del diagnostico (etapa 3).
+        Cada regla se vincula con un smell del inventario en docs/02-diagnostico.md.
+    </description>
+
+    <!-- S01 God Class / Large Class -->
+    <rule ref="category/java/design.xml/GodClass"/>
+    <rule ref="category/java/design.xml/TooManyMethods">
+        <properties>
+            <property name="maxmethods" value="8"/>
+        </properties>
+    </rule>
+
+    <!-- S02 Long Method y complejidad -->
+    <rule ref="category/java/design.xml/NcssCount">
+        <properties>
+            <property name="methodReportLevel" value="25"/>
+            <property name="classReportLevel" value="200"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml/CyclomaticComplexity">
+        <properties>
+            <property name="methodReportLevel" value="8"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml/CognitiveComplexity">
+        <properties>
+            <property name="reportLevel" value="12"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml/AvoidDeeplyNestedIfStmts">
+        <properties>
+            <property name="problemDepth" value="3"/>
+        </properties>
+    </rule>
+
+    <!-- S03 Long Parameter List -->
+    <rule ref="category/java/design.xml/ExcessiveParameterList">
+        <properties>
+            <property name="minimum" value="4"/>
+        </properties>
+    </rule>
+
+    <!-- S04 Primitive Obsession / literales magicos repetidos -->
+    <rule ref="category/java/errorprone.xml/AvoidDuplicateLiterals">
+        <properties>
+            <property name="maxDuplicateLiterals" value="3"/>
+        </properties>
+    </rule>
+
+    <!-- S08 Data Class -->
+    <rule ref="category/java/design.xml/DataClass"/>
+
+    <!-- S09 Manejo de errores -->
+    <rule ref="category/java/errorprone.xml/EmptyCatchBlock"/>
+    <rule ref="category/java/design.xml/AvoidCatchingGenericException"/>
+
+    <!-- S10 Acoplamiento con la consola dentro de la logica -->
+    <rule ref="category/java/bestpractices.xml/SystemPrintln"/>
+
+    <!-- S11 Nombres poco expresivos -->
+    <rule ref="category/java/codestyle.xml/ShortVariable">
+        <properties>
+            <!-- "id" se acepta como convencion del dominio -->
+            <property name="violationSuppressRegex" value=".*short names like id$"/>
+        </properties>
+    </rule>
+
+    <!-- S12 Codigo muerto -->
+    <rule ref="category/java/bestpractices.xml/UnusedPrivateMethod"/>
+    <rule ref="category/java/design.xml/SimplifyBooleanReturns"/>
+
+    <!-- Higiene general -->
+    <rule ref="category/java/bestpractices.xml/AvoidReassigningParameters"/>
+    <rule ref="category/java/bestpractices.xml/ForLoopCanBeForeach"/>
+    <rule ref="category/java/errorprone.xml/CloseResource"/>
+</ruleset>

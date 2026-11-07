@@ -1,0 +1,64 @@
+{
+  "archivos": [
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/App.java",
+      "loc": 74,
+      "metodos": 1,
+      "metodo_mas_largo": "main (73)",
+      "max_lineas_metodo": 73,
+      "max_parametros": 1,
+      "max_complejidad": 10,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/Estudiante.java",
+      "loc": 7,
+      "metodos": 0,
+      "metodo_mas_largo": "-",
+      "max_lineas_metodo": 0,
+      "max_parametros": 0,
+      "max_complejidad": 0,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/GestorSolicitudes.java",
+      "loc": 401,
+      "metodos": 9,
+      "metodo_mas_largo": "registrarSolicitud (101)",
+      "max_lineas_metodo": 101,
+      "max_parametros": 5,
+      "max_complejidad": 29,
+      "literales_de_regla": 58
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/Responsable.java",
+      "loc": 6,
+      "metodos": 0,
+      "metodo_mas_largo": "-",
+      "max_lineas_metodo": 0,
+      "max_parametros": 0,
+      "max_complejidad": 0,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/Solicitud.java",
+      "loc": 13,
+      "metodos": 0,
+      "metodo_mas_largo": "-",
+      "max_lineas_metodo": 0,
+      "max_parametros": 0,
+      "max_complejidad": 0,
+      "literales_de_regla": 0
+    }
+  ],
+  "total": {
+    "archivos": 5,
+    "loc": 501,
+    "loc_archivo_mas_grande": 401,
+    "metodos": 10,
+    "max_lineas_metodo": 101,
+    "max_parametros": 5,
+    "max_complejidad": 29,
+    "literales_de_regla": 58
+  }
+}

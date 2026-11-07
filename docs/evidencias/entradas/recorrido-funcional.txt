@@ -1,0 +1,26 @@
+6
+1
+1002
+revision
+Revision del final de Algoritmos
+s
+2
+9
+R03
+3
+9
+EN_PROCESO
+4
+PENDIENTE
+
+
+
+n
+4
+
+
+
+
+s
+5
+0
