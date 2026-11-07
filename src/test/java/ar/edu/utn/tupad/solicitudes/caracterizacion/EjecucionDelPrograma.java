@@ -31,6 +31,15 @@ final class EjecucionDelPrograma {
                               Path carpetaDeTrabajo) {
         try {
             datos.prepararEn(carpetaDeTrabajo);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return ejecutarDeNuevo(clasePrincipal, lineasDeEntrada, carpetaDeTrabajo);
+    }
+
+    /** Ejecuta otra sesion sobre la misma carpeta, con los archivos que dejo la sesion anterior. */
+    static Resultado ejecutarDeNuevo(Class<?> clasePrincipal, List<String> lineasDeEntrada, Path carpetaDeTrabajo) {
+        try {
             Path entrada = carpetaDeTrabajo.resolve("entrada.txt");
             Files.write(entrada, lineasDeEntrada, StandardCharsets.UTF_8);
 

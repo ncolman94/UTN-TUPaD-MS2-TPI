@@ -38,6 +38,15 @@ class PedidoTest {
     }
 
     @Test
+    @DisplayName("CR-02: rechaza el punto y coma, que es el separador del archivo")
+    void rechazaPuntoYComa() {
+        ReglaDeNegocioException error = assertThrows(ReglaDeNegocioException.class,
+                () -> new Pedido("1001", TipoSolicitud.EXAMEN, "Constancia; urgente", false));
+
+        assertEquals("la descripcion no puede contener ';'", error.getMessage());
+    }
+
+    @Test
     void quitaLosEspaciosDeLosExtremos() {
         Pedido pedido = new Pedido("1001", TipoSolicitud.EXAMEN, "  Constancia  ", false);
 

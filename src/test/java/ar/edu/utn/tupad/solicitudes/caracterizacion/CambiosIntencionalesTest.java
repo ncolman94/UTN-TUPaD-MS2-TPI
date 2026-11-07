@@ -119,6 +119,27 @@ class CambiosIntencionalesTest {
                         "encabezado + 8 solicitudes + la nueva; la linea danada se descarta al reescribir"));
     }
 
+    @Test
+    @DisplayName("CR-02: una descripcion con punto y coma se rechaza en lugar de corromper el archivo")
+    void descripcionConPuntoYComa() throws IOException {
+        List<String> registrar = List.of("1", "1001", "EXAMEN", "Constancia; urgente", "n", "0");
+        List<String> listar = List.of("6", "0");
+        Path carpetaInicial = carpetaTemporal.resolve("version-inicial");
+
+        EjecucionDelPrograma.ejecutar(legacy.App.class, registrar, DatosIniciales.EJEMPLO, carpetaInicial);
+        Resultado inicialAlReiniciar = EjecucionDelPrograma.ejecutarDeNuevo(legacy.App.class, listar, carpetaInicial);
+        Resultado actual = ejecutarVersionActual(registrar, DatosIniciales.EJEMPLO);
+
+        guardar("CR-02-descripcion-con-punto-y-coma", registrar, inicialAlReiniciar, actual);
+        assertAll(
+                () -> assertTrue(inicialAlReiniciar.salida().contains(
+                        "#9 | EXAMEN |  urgente | MEDIA | Leg: 1001 | Resp: PENDIENTE"),
+                        "al reiniciar, la version inicial lee la solicitud con los campos corridos"),
+                () -> assertTrue(actual.salida().contains("Error: la descripcion no puede contener ';'")),
+                () -> assertFalse(actual.solicitudesCsv().contains("urgente")),
+                () -> assertEquals(9, actual.solicitudesCsv().lines().count()));
+    }
+
     private Resultado ejecutarVersionInicial(List<String> entrada, DatosIniciales datos) {
         Path carpeta = carpetaTemporal.resolve("version-inicial");
         Resultado resultado = EjecucionDelPrograma.ejecutar(legacy.App.class, entrada, datos, carpeta);
