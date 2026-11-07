@@ -4,77 +4,88 @@ import java.util.Scanner;
 
 public class App {
 
+    private static final int OPCION_SALIR = 0;
+
+    private final GestorSolicitudes gestor;
+    private final Scanner entrada;
+
+    App(GestorSolicitudes gestor, Scanner entrada) {
+        this.gestor = gestor;
+        this.entrada = entrada;
+    }
+
     public static void main(String[] args) {
-        GestorSolicitudes g = new GestorSolicitudes();
-        g.cargar();
-        Scanner sc = new Scanner(System.in);
-        int op = -1;
-        while (op != 0) {
-            System.out.println();
-            System.out.println("===== GESTION DE SOLICITUDES ACADEMICAS =====");
-            System.out.println("1. Registrar solicitud");
-            System.out.println("2. Asignar responsable");
-            System.out.println("3. Cambiar estado");
-            System.out.println("4. Buscar solicitudes");
-            System.out.println("5. Reporte");
-            System.out.println("6. Listar todas");
-            System.out.println("0. Salir");
-            System.out.print("Opcion: ");
-            op = Integer.parseInt(sc.nextLine());
-            switch (op) {
-                case 1:
-                    System.out.print("Legajo: ");
-                    String leg = sc.nextLine();
-                    System.out.print("Tipo (CERTIFICADO/EXAMEN/EQUIVALENCIA/REVISION/BAJA): ");
-                    String t = sc.nextLine();
-                    System.out.print("Descripcion: ");
-                    String d = sc.nextLine();
-                    System.out.print("Urgente (s/n): ");
-                    String u = sc.nextLine();
-                    g.registrarSolicitud(leg, t, d, u.equals("s") || u.equals("S"));
-                    break;
-                case 2:
-                    System.out.print("Numero de solicitud: ");
-                    int id = Integer.parseInt(sc.nextLine());
-                    System.out.print("Id del responsable: ");
-                    String r = sc.nextLine();
-                    g.asignarResponsable(id, r);
-                    break;
-                case 3:
-                    System.out.print("Numero de solicitud: ");
-                    int id2 = Integer.parseInt(sc.nextLine());
-                    System.out.print("Nuevo estado (EN_PROCESO/RESUELTA/RECHAZADA): ");
-                    String e = sc.nextLine();
-                    g.cambiarEstado(id2, e);
-                    break;
-                case 4:
-                    System.out.print("Estado (enter para omitir): ");
-                    String es = sc.nextLine();
-                    System.out.print("Tipo (enter para omitir): ");
-                    String ti = sc.nextLine();
-                    System.out.print("Legajo (enter para omitir): ");
-                    String le = sc.nextLine();
-                    System.out.print("Prioridad (enter para omitir): ");
-                    String pr = sc.nextLine();
-                    System.out.print("Solo vencidas (s/n): ");
-                    String sv = sc.nextLine();
-                    g.buscar(es, ti, le, pr, sv.equalsIgnoreCase("s"));
-                    break;
-                case 5:
-                    g.reporte();
-                    break;
-                case 6:
-                    g.listar();
-                    break;
-                // case 7:
-                //     g.borrar(id);
-                //     break;
-                case 0:
-                    System.out.println("Hasta luego");
-                    break;
-                default:
-                    System.out.println("Opcion invalida");
-            }
+        GestorSolicitudes gestor = new GestorSolicitudes();
+        gestor.cargar();
+        new App(gestor, new Scanner(System.in)).iniciar();
+    }
+
+    void iniciar() {
+        int opcion;
+        do {
+            mostrarMenu();
+            opcion = Integer.parseInt(entrada.nextLine());
+            ejecutar(opcion);
+        } while (opcion != OPCION_SALIR);
+    }
+
+    private void mostrarMenu() {
+        System.out.println();
+        System.out.println("===== GESTION DE SOLICITUDES ACADEMICAS =====");
+        System.out.println("1. Registrar solicitud");
+        System.out.println("2. Asignar responsable");
+        System.out.println("3. Cambiar estado");
+        System.out.println("4. Buscar solicitudes");
+        System.out.println("5. Reporte");
+        System.out.println("6. Listar todas");
+        System.out.println("0. Salir");
+        System.out.print("Opcion: ");
+    }
+
+    private void ejecutar(int opcion) {
+        switch (opcion) {
+            case 1 -> registrarSolicitud();
+            case 2 -> asignarResponsable();
+            case 3 -> cambiarEstado();
+            case 4 -> buscarSolicitudes();
+            case 5 -> gestor.reporte();
+            case 6 -> gestor.listar();
+            case OPCION_SALIR -> System.out.println("Hasta luego");
+            default -> System.out.println("Opcion invalida");
         }
+    }
+
+    private void registrarSolicitud() {
+        String legajo = preguntar("Legajo: ");
+        String tipo = preguntar("Tipo (CERTIFICADO/EXAMEN/EQUIVALENCIA/REVISION/BAJA): ");
+        String descripcion = preguntar("Descripcion: ");
+        String urgente = preguntar("Urgente (s/n): ");
+        gestor.registrarSolicitud(legajo, tipo, descripcion, urgente.equals("s") || urgente.equals("S"));
+    }
+
+    private void asignarResponsable() {
+        int numero = Integer.parseInt(preguntar("Numero de solicitud: "));
+        String idResponsable = preguntar("Id del responsable: ");
+        gestor.asignarResponsable(numero, idResponsable);
+    }
+
+    private void cambiarEstado() {
+        int numero = Integer.parseInt(preguntar("Numero de solicitud: "));
+        String estado = preguntar("Nuevo estado (EN_PROCESO/RESUELTA/RECHAZADA): ");
+        gestor.cambiarEstado(numero, estado);
+    }
+
+    private void buscarSolicitudes() {
+        String estado = preguntar("Estado (enter para omitir): ");
+        String tipo = preguntar("Tipo (enter para omitir): ");
+        String legajo = preguntar("Legajo (enter para omitir): ");
+        String prioridad = preguntar("Prioridad (enter para omitir): ");
+        String soloVencidas = preguntar("Solo vencidas (s/n): ");
+        gestor.buscar(estado, tipo, legajo, prioridad, soloVencidas.equalsIgnoreCase("s"));
+    }
+
+    private String preguntar(String texto) {
+        System.out.print(texto);
+        return entrada.nextLine();
     }
 }

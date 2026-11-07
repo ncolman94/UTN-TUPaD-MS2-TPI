@@ -3,427 +3,449 @@ package ar.edu.utn.tupad.solicitudes;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Clase principal del sistema. Maneja todo lo de las solicitudes.
+ * Gestiona las solicitudes academicas: carga y guarda los archivos, aplica las reglas de negocio
+ * y muestra los resultados por consola.
  */
 public class GestorSolicitudes {
 
-    public ArrayList<Solicitud> lista = new ArrayList<>();
-    public ArrayList<Estudiante> estudiantes = new ArrayList<>();
-    public ArrayList<Responsable> resp = new ArrayList<>();
-    DateTimeFormatter f = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final String ARCHIVO_ESTUDIANTES = "datos/estudiantes.csv";
+    private static final String ARCHIVO_RESPONSABLES = "datos/responsables.csv";
+    private static final String ARCHIVO_SOLICITUDES = "datos/solicitudes.csv";
+    private static final String ENCABEZADO_SOLICITUDES =
+            "id;legajo;tipo;descripcion;prioridad;estado;responsable;fechaAlta;fechaVencimiento;fechaCierre";
+    private static final String SEPARADOR = ";";
+    private static final String SIN_VALOR = "";
+    private static final int LARGO_MAXIMO_DESCRIPCION = 200;
+    private static final int PLAZO_MINIMO_EN_DIAS = 1;
+    private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    // carga los datos de los archivos
+    private final List<Solicitud> solicitudes = new ArrayList<>();
+    private final List<Estudiante> estudiantes = new ArrayList<>();
+    private final List<Responsable> responsables = new ArrayList<>();
+
     public void cargar() {
-        try {
-            BufferedReader br = new BufferedReader(new FileReader("datos/estudiantes.csv"));
-            String linea = br.readLine(); // salteo encabezado
-            while ((linea = br.readLine()) != null) {
-                String[] p = linea.split(";");
-                Estudiante e = new Estudiante();
-                e.legajo = p[0];
-                e.nombre = p[1];
-                e.carrera = p[2];
-                e.email = p[3];
-                estudiantes.add(e);
-            }
-            br.close();
-        } catch (Exception e) {
-        }
-        try {
-            BufferedReader br = new BufferedReader(new FileReader("datos/responsables.csv"));
-            String linea = br.readLine(); // salteo encabezado
-            while ((linea = br.readLine()) != null) {
-                String[] p = linea.split(";");
-                Responsable r = new Responsable();
-                r.id = p[0];
-                r.nombre = p[1];
-                r.area = p[2];
-                resp.add(r);
-            }
-            br.close();
-        } catch (Exception e) {
-        }
-        try {
-            BufferedReader br = new BufferedReader(new FileReader("datos/solicitudes.csv"));
-            String linea = br.readLine(); // salteo encabezado
-            while ((linea = br.readLine()) != null) {
-                String[] p = linea.split(";", -1);
-                Solicitud s = new Solicitud();
-                s.id = Integer.parseInt(p[0]);
-                s.legajo = p[1];
-                s.tipo = p[2];
-                s.desc = p[3];
-                s.prioridad = p[4];
-                s.estado = p[5];
-                s.responsable = p[6];
-                s.fechaAlta = p[7];
-                s.fechaVto = p[8];
-                s.fechaCierre = p[9];
-                lista.add(s);
-            }
-            br.close();
-        } catch (Exception e) {
-        }
+        cargarEstudiantes();
+        cargarResponsables();
+        cargarSolicitudes();
     }
 
-    // guarda las solicitudes en el archivo
-    public void guardar() {
-        try {
-            FileWriter fw = new FileWriter("datos/solicitudes.csv");
-            fw.write("id;legajo;tipo;descripcion;prioridad;estado;responsable;fechaAlta;fechaVencimiento;fechaCierre\n");
-            for (int i = 0; i < lista.size(); i++) {
-                Solicitud s = lista.get(i);
-                fw.write(s.id + ";" + s.legajo + ";" + s.tipo + ";" + s.desc + ";" + s.prioridad + ";" + s.estado + ";"
-                        + s.responsable + ";" + s.fechaAlta + ";" + s.fechaVto + ";" + s.fechaCierre + "\n");
-            }
-            fw.close();
-        } catch (Exception e) {
-            System.out.println("Error al guardar");
-        }
-    }
+    // ---------------------------------------------------------------- casos de uso
 
-    public void registrarSolicitud(String legajo, String tipo, String desc, boolean urgente) {
-        // valido que exista el estudiante
-        boolean existe = false;
-        for (int i = 0; i < estudiantes.size(); i++) {
-            if (estudiantes.get(i).legajo.equals(legajo)) {
-                existe = true;
-            }
-        }
-        if (!existe) {
-            System.out.println("Error: no existe un estudiante con legajo " + legajo);
+    public void registrarSolicitud(String legajo, String tipoIngresado, String descripcion, boolean urgente) {
+        String tipo = tipoIngresado.toUpperCase().trim();
+        String error = validarNuevaSolicitud(legajo, tipo, descripcion);
+        if (error != null) {
+            System.out.println("Error: " + error);
             return;
         }
-        tipo = tipo.toUpperCase().trim();
-        if (!tipo.equals("CERTIFICADO") && !tipo.equals("EXAMEN") && !tipo.equals("EQUIVALENCIA")
-                && !tipo.equals("REVISION") && !tipo.equals("BAJA")) {
-            System.out.println("Error: tipo de solicitud invalido");
-            return;
-        }
-        if (desc == null || desc.trim().equals("")) {
-            System.out.println("Error: la descripcion es obligatoria");
-            return;
-        }
-        if (desc.length() > 200) {
-            System.out.println("Error: la descripcion no puede superar los 200 caracteres");
-            return;
-        }
-        // calculo la prioridad segun el tipo
-        String p = "";
-        switch (tipo) {
-            case "CERTIFICADO":
-                p = "BAJA";
-                break;
-            case "EXAMEN":
-                p = "MEDIA";
-                break;
-            case "EQUIVALENCIA":
-                p = "MEDIA";
-                break;
-            case "REVISION":
-                p = "ALTA";
-                break;
-            case "BAJA":
-                p = "ALTA";
-                break;
-        }
-        if (urgente) {
-            if (p.equals("BAJA")) {
-                p = "MEDIA";
-            } else if (p.equals("MEDIA")) {
-                p = "ALTA";
-            }
-        }
-        // calculo el plazo en dias
-        int dias = 0;
-        switch (tipo) {
-            case "CERTIFICADO":
-                dias = 3;
-                break;
-            case "EXAMEN":
-                dias = 5;
-                break;
-            case "EQUIVALENCIA":
-                dias = 30;
-                break;
-            case "REVISION":
-                dias = 10;
-                break;
-            case "BAJA":
-                dias = 7;
-                break;
-        }
-        if (urgente) {
-            dias = dias / 2;
-            if (dias < 1) {
-                dias = 1;
-            }
-        }
-        // busco el id mas alto
-        int max = 0;
-        for (Solicitud s : lista) {
-            if (s.id > max) {
-                max = s.id;
-            }
-        }
-        Solicitud s = new Solicitud();
-        s.id = max + 1;
-        s.legajo = legajo;
-        s.tipo = tipo;
-        s.desc = desc.trim();
-        s.prioridad = p;
-        s.estado = "PENDIENTE";
-        s.responsable = "";
         LocalDate hoy = LocalDate.now();
-        s.fechaAlta = hoy.format(f);
-        s.fechaVto = hoy.plusDays(dias).format(f);
-        s.fechaCierre = "";
-        // s.fechaVto = hoy.plusDays(5).format(f); // antes era fijo
-        lista.add(s);
+        Solicitud solicitud = new Solicitud();
+        solicitud.id = proximoNumero();
+        solicitud.legajo = legajo;
+        solicitud.tipo = tipo;
+        solicitud.desc = descripcion.trim();
+        solicitud.prioridad = calcularPrioridad(tipo, urgente);
+        solicitud.estado = "PENDIENTE";
+        solicitud.responsable = SIN_VALOR;
+        solicitud.fechaAlta = hoy.format(FORMATO_FECHA);
+        solicitud.fechaVto = hoy.plusDays(calcularPlazoEnDias(tipo, urgente)).format(FORMATO_FECHA);
+        solicitud.fechaCierre = SIN_VALOR;
+        solicitudes.add(solicitud);
         guardar();
-        System.out.println("Solicitud #" + s.id + " registrada. Prioridad: " + s.prioridad + ". Vence: " + s.fechaVto);
+        System.out.println("Solicitud #" + solicitud.id + " registrada. Prioridad: " + solicitud.prioridad
+                + ". Vence: " + solicitud.fechaVto);
     }
 
-    public void asignarResponsable(int id, String idResp) {
-        Solicitud sol = null;
-        for (Solicitud s : lista) {
-            if (s.id == id) {
-                sol = s;
-            }
-        }
-        if (sol == null) {
-            System.out.println("Error: no existe la solicitud #" + id);
+    public void asignarResponsable(int numero, String idResponsable) {
+        Solicitud solicitud = buscarSolicitud(numero);
+        if (solicitud == null) {
+            System.out.println("Error: no existe la solicitud #" + numero);
             return;
         }
-        Responsable r = null;
-        for (Responsable x : resp) {
-            if (x.id.equalsIgnoreCase(idResp)) {
-                r = x;
-            }
-        }
-        if (r == null) {
-            System.out.println("Error: no existe el responsable " + idResp);
+        Responsable responsable = buscarResponsable(idResponsable);
+        if (responsable == null) {
+            System.out.println("Error: no existe el responsable " + idResponsable);
             return;
         }
-        if (sol.estado.equals("RESUELTA") || sol.estado.equals("RECHAZADA")) {
-            System.out.println("Error: la solicitud #" + id + " ya esta cerrada");
+        if (estaCerrada(solicitud)) {
+            System.out.println("Error: la solicitud #" + numero + " ya esta cerrada");
             return;
         }
-        // el area depende del tipo
-        String area = "";
-        switch (sol.tipo) {
-            case "CERTIFICADO":
-                area = "BEDELIA";
-                break;
-            case "EXAMEN":
-                area = "BEDELIA";
-                break;
-            case "BAJA":
-                area = "BEDELIA";
-                break;
-            case "EQUIVALENCIA":
-                area = "SECRETARIA ACADEMICA";
-                break;
-            case "REVISION":
-                area = "SECRETARIA ACADEMICA";
-                break;
-        }
-        if (!r.area.equals(area)) {
-            System.out.println("Error: " + r.nombre + " no pertenece al area " + area);
+        String areaRequerida = areaDelTipo(solicitud.tipo);
+        if (!responsable.area.equals(areaRequerida)) {
+            System.out.println("Error: " + responsable.nombre + " no pertenece al area " + areaRequerida);
             return;
         }
-        sol.responsable = r.id;
+        solicitud.responsable = responsable.id;
         guardar();
-        System.out.println("Solicitud #" + id + " asignada a " + r.nombre + " (" + r.area + ")");
+        System.out.println("Solicitud #" + numero + " asignada a " + responsable.nombre + " (" + responsable.area + ")");
     }
 
-    public void cambiarEstado(int id, String nuevo) {
-        Solicitud sol = null;
-        for (Solicitud s : lista) {
-            if (s.id == id) {
-                sol = s;
-            }
-        }
-        if (sol == null) {
-            System.out.println("Error: no existe la solicitud #" + id);
+    public void cambiarEstado(int numero, String estadoIngresado) {
+        Solicitud solicitud = buscarSolicitud(numero);
+        if (solicitud == null) {
+            System.out.println("Error: no existe la solicitud #" + numero);
             return;
         }
-        nuevo = nuevo.toUpperCase().trim();
-        boolean ok = false;
-        if (sol.estado.equals("PENDIENTE")) {
-            if (nuevo.equals("EN_PROCESO")) {
-                if (sol.responsable == null || sol.responsable.equals("")) {
-                    System.out.println("Error: la solicitud debe tener un responsable asignado");
-                    return;
-                } else {
-                    ok = true;
-                }
-            } else if (nuevo.equals("RECHAZADA")) {
-                ok = true;
-            }
-        } else if (sol.estado.equals("EN_PROCESO")) {
-            if (nuevo.equals("RESUELTA") || nuevo.equals("RECHAZADA")) {
-                ok = true;
-            }
-        } else {
-            System.out.println("Error: la solicitud #" + id + " ya esta cerrada");
+        if (estaCerrada(solicitud)) {
+            System.out.println("Error: la solicitud #" + numero + " ya esta cerrada");
             return;
         }
-        if (!ok) {
-            System.out.println("Error: no se puede pasar de " + sol.estado + " a " + nuevo);
+        String destino = estadoIngresado.toUpperCase().trim();
+        if (solicitud.estado.equals("PENDIENTE") && destino.equals("EN_PROCESO") && !tieneResponsable(solicitud)) {
+            System.out.println("Error: la solicitud debe tener un responsable asignado");
             return;
         }
-        sol.estado = nuevo;
-        if (nuevo.equals("RESUELTA") || nuevo.equals("RECHAZADA")) {
-            sol.fechaCierre = LocalDate.now().format(f);
+        if (!esTransicionPermitida(solicitud.estado, destino)) {
+            System.out.println("Error: no se puede pasar de " + solicitud.estado + " a " + destino);
+            return;
+        }
+        solicitud.estado = destino;
+        if (esEstadoCerrado(destino)) {
+            solicitud.fechaCierre = LocalDate.now().format(FORMATO_FECHA);
         }
         guardar();
-        System.out.println("Solicitud #" + id + ": estado actualizado a " + nuevo);
+        System.out.println("Solicitud #" + numero + ": estado actualizado a " + destino);
     }
 
     public void buscar(String estado, String tipo, String legajo, String prioridad, boolean soloVencidas) {
-        ArrayList<Solicitud> res = new ArrayList<>();
         LocalDate hoy = LocalDate.now();
-        for (Solicitud s : lista) {
-            boolean va = true;
-            if (estado != null && !estado.equals("") && !s.estado.equalsIgnoreCase(estado)) {
-                va = false;
-            }
-            if (tipo != null && !tipo.equals("") && !s.tipo.equalsIgnoreCase(tipo)) {
-                va = false;
-            }
-            if (legajo != null && !legajo.equals("") && !s.legajo.equals(legajo)) {
-                va = false;
-            }
-            if (prioridad != null && !prioridad.equals("") && !s.prioridad.equalsIgnoreCase(prioridad)) {
-                va = false;
-            }
-            if (soloVencidas) {
-                LocalDate vto = LocalDate.parse(s.fechaVto, f);
-                if (!(vto.isBefore(hoy) && (s.estado.equals("PENDIENTE") || s.estado.equals("EN_PROCESO")))) {
-                    va = false;
-                }
-            }
-            if (va) {
-                res.add(s);
+        List<Solicitud> encontradas = new ArrayList<>();
+        for (Solicitud solicitud : solicitudes) {
+            if (cumpleFiltro(solicitud, estado, tipo, legajo, prioridad, soloVencidas, hoy)) {
+                encontradas.add(solicitud);
             }
         }
-        if (res.size() == 0) {
+        if (encontradas.isEmpty()) {
             System.out.println("No se encontraron solicitudes");
             return;
         }
-        System.out.println("Se encontraron " + res.size() + " solicitudes:");
-        for (Solicitud s : res) {
-            System.out.println("#" + s.id + " | " + s.tipo + " | " + s.prioridad + " | " + s.estado + " | Leg: " + s.legajo
-                    + " | Resp: " + (s.responsable.equals("") ? "-" : s.responsable) + " | Vence: " + s.fechaVto + " | " + s.desc);
-        }
+        System.out.println("Se encontraron " + encontradas.size() + " solicitudes:");
+        imprimirLineas(encontradas);
     }
 
     public void listar() {
-        if (lista.size() == 0) {
+        if (solicitudes.isEmpty()) {
             System.out.println("No hay solicitudes cargadas");
             return;
         }
-        System.out.println("Solicitudes registradas: " + lista.size());
-        for (int i = 0; i < lista.size(); i++) {
-            Solicitud s = lista.get(i);
-            System.out.println("#" + s.id + " | " + s.tipo + " | " + s.prioridad + " | " + s.estado + " | Leg: " + s.legajo
-                    + " | Resp: " + (s.responsable.equals("") ? "-" : s.responsable) + " | Vence: " + s.fechaVto + " | " + s.desc);
-        }
+        System.out.println("Solicitudes registradas: " + solicitudes.size());
+        imprimirLineas(solicitudes);
     }
 
     public void reporte() {
-        int pend = 0, proc = 0, res = 0, rech = 0;
-        int cert = 0, exa = 0, equi = 0, rev = 0, baja = 0;
-        int bedelia = 0, secretaria = 0;
-        int vencidas = 0;
-        int cerradas = 0;
-        long totalDias = 0;
         LocalDate hoy = LocalDate.now();
-        for (Solicitud s : lista) {
-            if (s.estado.equals("PENDIENTE")) {
-                pend++;
-            } else if (s.estado.equals("EN_PROCESO")) {
-                proc++;
-            } else if (s.estado.equals("RESUELTA")) {
-                res++;
-            } else if (s.estado.equals("RECHAZADA")) {
-                rech++;
-            }
-
-            if (s.tipo.equals("CERTIFICADO")) {
-                cert++;
-            }
-            if (s.tipo.equals("EXAMEN")) {
-                exa++;
-            }
-            if (s.tipo.equals("EQUIVALENCIA")) {
-                equi++;
-            }
-            if (s.tipo.equals("REVISION")) {
-                rev++;
-            }
-            if (s.tipo.equals("BAJA")) {
-                baja++;
-            }
-
-            if (s.tipo.equals("CERTIFICADO") || s.tipo.equals("EXAMEN") || s.tipo.equals("BAJA")) {
-                bedelia++;
-            } else {
-                secretaria++;
-            }
-
-            // vencidas: no cerradas y con fecha de vencimiento pasada
-            if (s.estado.equals("PENDIENTE") || s.estado.equals("EN_PROCESO")) {
-                LocalDate vto = LocalDate.parse(s.fechaVto, f);
-                if (vto.isBefore(hoy)) {
-                    vencidas++;
-                }
-            }
-            if (s.estado.equals("RESUELTA")) {
-                LocalDate alta = LocalDate.parse(s.fechaAlta, f);
-                LocalDate cierre = LocalDate.parse(s.fechaCierre, f);
-                totalDias += ChronoUnit.DAYS.between(alta, cierre);
-                cerradas++;
-            }
-        }
         System.out.println("===== REPORTE DE SOLICITUDES =====");
-        System.out.println("Total de solicitudes: " + lista.size());
+        System.out.println("Total de solicitudes: " + solicitudes.size());
         System.out.println("-- Por estado --");
-        System.out.println("PENDIENTE: " + pend);
-        System.out.println("EN_PROCESO: " + proc);
-        System.out.println("RESUELTA: " + res);
-        System.out.println("RECHAZADA: " + rech);
+        for (String estado : new String[] {"PENDIENTE", "EN_PROCESO", "RESUELTA", "RECHAZADA"}) {
+            System.out.println(estado + ": " + contarPorEstado(estado));
+        }
         System.out.println("-- Por tipo --");
-        System.out.println("CERTIFICADO: " + cert);
-        System.out.println("EXAMEN: " + exa);
-        System.out.println("EQUIVALENCIA: " + equi);
-        System.out.println("REVISION: " + rev);
-        System.out.println("BAJA: " + baja);
+        for (String tipo : new String[] {"CERTIFICADO", "EXAMEN", "EQUIVALENCIA", "REVISION", "BAJA"}) {
+            System.out.println(tipo + ": " + contarPorTipo(tipo));
+        }
         System.out.println("-- Por area --");
-        System.out.println("BEDELIA: " + bedelia);
-        System.out.println("SECRETARIA ACADEMICA: " + secretaria);
-        System.out.println("Vencidas sin resolver: " + vencidas);
-        if (cerradas > 0) {
-            double prom = (double) totalDias / cerradas;
-            System.out.println("Tiempo promedio de resolucion: " + String.format("%.1f", prom) + " dias");
-        } else {
-            System.out.println("Tiempo promedio de resolucion: sin datos");
+        for (String area : new String[] {"BEDELIA", "SECRETARIA ACADEMICA"}) {
+            System.out.println(area + ": " + contarPorArea(area));
+        }
+        System.out.println("Vencidas sin resolver: " + contarVencidas(hoy));
+        System.out.println("Tiempo promedio de resolucion: " + promedioDeResolucionComoTexto());
+    }
+
+    // ---------------------------------------------------------------- reglas de negocio
+
+    /** Devuelve el mensaje de error de la primera validacion que falla, o null si los datos son validos. */
+    private String validarNuevaSolicitud(String legajo, String tipo, String descripcion) {
+        if (!existeEstudiante(legajo)) {
+            return "no existe un estudiante con legajo " + legajo;
+        }
+        if (!esTipoValido(tipo)) {
+            return "tipo de solicitud invalido";
+        }
+        if (descripcion == null || descripcion.trim().isEmpty()) {
+            return "la descripcion es obligatoria";
+        }
+        if (descripcion.length() > LARGO_MAXIMO_DESCRIPCION) {
+            return "la descripcion no puede superar los " + LARGO_MAXIMO_DESCRIPCION + " caracteres";
+        }
+        return null;
+    }
+
+    private boolean esTipoValido(String tipo) {
+        return tipo.equals("CERTIFICADO") || tipo.equals("EXAMEN") || tipo.equals("EQUIVALENCIA")
+                || tipo.equals("REVISION") || tipo.equals("BAJA");
+    }
+
+    private String calcularPrioridad(String tipo, boolean urgente) {
+        String prioridadBase = prioridadBaseDelTipo(tipo);
+        return urgente ? elevarPrioridad(prioridadBase) : prioridadBase;
+    }
+
+    private String prioridadBaseDelTipo(String tipo) {
+        switch (tipo) {
+            case "CERTIFICADO":
+                return "BAJA";
+            case "EXAMEN":
+            case "EQUIVALENCIA":
+                return "MEDIA";
+            default:
+                return "ALTA";
         }
     }
 
-    // ya no se usa
-    private boolean esUrgente(String prioridad) {
-        if (prioridad.equals("ALTA")) {
-            return true;
-        } else {
-            return false;
+    private String elevarPrioridad(String prioridad) {
+        if (prioridad.equals("BAJA")) {
+            return "MEDIA";
+        }
+        return "ALTA";
+    }
+
+    private int calcularPlazoEnDias(String tipo, boolean urgente) {
+        int plazo = plazoBaseDelTipo(tipo);
+        return urgente ? Math.max(PLAZO_MINIMO_EN_DIAS, plazo / 2) : plazo;
+    }
+
+    private int plazoBaseDelTipo(String tipo) {
+        switch (tipo) {
+            case "CERTIFICADO":
+                return 3;
+            case "EXAMEN":
+                return 5;
+            case "EQUIVALENCIA":
+                return 30;
+            case "REVISION":
+                return 10;
+            default:
+                return 7;
+        }
+    }
+
+    private String areaDelTipo(String tipo) {
+        switch (tipo) {
+            case "EQUIVALENCIA":
+            case "REVISION":
+                return "SECRETARIA ACADEMICA";
+            default:
+                return "BEDELIA";
+        }
+    }
+
+    private boolean esTransicionPermitida(String origen, String destino) {
+        if (origen.equals("PENDIENTE")) {
+            return destino.equals("EN_PROCESO") || destino.equals("RECHAZADA");
+        }
+        return origen.equals("EN_PROCESO") && esEstadoCerrado(destino);
+    }
+
+    private boolean esEstadoCerrado(String estado) {
+        return estado.equals("RESUELTA") || estado.equals("RECHAZADA");
+    }
+
+    private boolean estaCerrada(Solicitud solicitud) {
+        return esEstadoCerrado(solicitud.estado);
+    }
+
+    private boolean estaAbierta(Solicitud solicitud) {
+        return solicitud.estado.equals("PENDIENTE") || solicitud.estado.equals("EN_PROCESO");
+    }
+
+    private boolean estaVencida(Solicitud solicitud, LocalDate hoy) {
+        return estaAbierta(solicitud) && LocalDate.parse(solicitud.fechaVto, FORMATO_FECHA).isBefore(hoy);
+    }
+
+    private boolean tieneResponsable(Solicitud solicitud) {
+        return solicitud.responsable != null && !solicitud.responsable.isEmpty();
+    }
+
+    private boolean cumpleFiltro(Solicitud solicitud, String estado, String tipo, String legajo, String prioridad,
+                                 boolean soloVencidas, LocalDate hoy) {
+        return coincideSinMayusculas(estado, solicitud.estado)
+                && coincideSinMayusculas(tipo, solicitud.tipo)
+                && (sinCriterio(legajo) || solicitud.legajo.equals(legajo))
+                && coincideSinMayusculas(prioridad, solicitud.prioridad)
+                && (!soloVencidas || estaVencida(solicitud, hoy));
+    }
+
+    private boolean coincideSinMayusculas(String criterio, String valor) {
+        return sinCriterio(criterio) || valor.equalsIgnoreCase(criterio);
+    }
+
+    private boolean sinCriterio(String criterio) {
+        return criterio == null || criterio.isEmpty();
+    }
+
+    // ---------------------------------------------------------------- reporte
+
+    private long contarPorEstado(String estado) {
+        return solicitudes.stream().filter(s -> s.estado.equals(estado)).count();
+    }
+
+    private long contarPorTipo(String tipo) {
+        return solicitudes.stream().filter(s -> s.tipo.equals(tipo)).count();
+    }
+
+    private long contarPorArea(String area) {
+        return solicitudes.stream().filter(s -> areaDelTipo(s.tipo).equals(area)).count();
+    }
+
+    private long contarVencidas(LocalDate hoy) {
+        return solicitudes.stream().filter(s -> estaVencida(s, hoy)).count();
+    }
+
+    private String promedioDeResolucionComoTexto() {
+        long resueltas = 0;
+        long diasTotales = 0;
+        for (Solicitud solicitud : solicitudes) {
+            if (solicitud.estado.equals("RESUELTA")) {
+                LocalDate alta = LocalDate.parse(solicitud.fechaAlta, FORMATO_FECHA);
+                LocalDate cierre = LocalDate.parse(solicitud.fechaCierre, FORMATO_FECHA);
+                diasTotales += ChronoUnit.DAYS.between(alta, cierre);
+                resueltas++;
+            }
+        }
+        if (resueltas == 0) {
+            return "sin datos";
+        }
+        return String.format("%.1f", (double) diasTotales / resueltas) + " dias";
+    }
+
+    // ---------------------------------------------------------------- busquedas
+
+    private Solicitud buscarSolicitud(int numero) {
+        for (Solicitud solicitud : solicitudes) {
+            if (solicitud.id == numero) {
+                return solicitud;
+            }
+        }
+        return null;
+    }
+
+    private Responsable buscarResponsable(String idResponsable) {
+        for (Responsable responsable : responsables) {
+            if (responsable.id.equalsIgnoreCase(idResponsable)) {
+                return responsable;
+            }
+        }
+        return null;
+    }
+
+    private boolean existeEstudiante(String legajo) {
+        return estudiantes.stream().anyMatch(e -> e.legajo.equals(legajo));
+    }
+
+    private int proximoNumero() {
+        return solicitudes.stream().mapToInt(s -> s.id).max().orElse(0) + 1;
+    }
+
+    // ---------------------------------------------------------------- presentacion
+
+    private void imprimirLineas(List<Solicitud> lista) {
+        for (Solicitud solicitud : lista) {
+            System.out.println(formatearLinea(solicitud));
+        }
+    }
+
+    private String formatearLinea(Solicitud solicitud) {
+        String responsable = tieneResponsable(solicitud) ? solicitud.responsable : "-";
+        return "#" + solicitud.id + " | " + solicitud.tipo + " | " + solicitud.prioridad + " | " + solicitud.estado
+                + " | Leg: " + solicitud.legajo + " | Resp: " + responsable + " | Vence: " + solicitud.fechaVto
+                + " | " + solicitud.desc;
+    }
+
+    // ---------------------------------------------------------------- archivos
+
+    private void cargarEstudiantes() {
+        try {
+            for (String linea : leerLineasDeDatos(ARCHIVO_ESTUDIANTES)) {
+                String[] campos = linea.split(SEPARADOR);
+                Estudiante estudiante = new Estudiante();
+                estudiante.legajo = campos[0];
+                estudiante.nombre = campos[1];
+                estudiante.carrera = campos[2];
+                estudiante.email = campos[3];
+                estudiantes.add(estudiante);
+            }
+        } catch (IOException | RuntimeException e) {
+            // Igual que la version inicial: ante el primer error se deja de leer (defecto E3).
+        }
+    }
+
+    private void cargarResponsables() {
+        try {
+            for (String linea : leerLineasDeDatos(ARCHIVO_RESPONSABLES)) {
+                String[] campos = linea.split(SEPARADOR);
+                Responsable responsable = new Responsable();
+                responsable.id = campos[0];
+                responsable.nombre = campos[1];
+                responsable.area = campos[2];
+                responsables.add(responsable);
+            }
+        } catch (IOException | RuntimeException e) {
+            // Igual que la version inicial: ante el primer error se deja de leer (defecto E3).
+        }
+    }
+
+    private void cargarSolicitudes() {
+        try {
+            for (String linea : leerLineasDeDatos(ARCHIVO_SOLICITUDES)) {
+                solicitudes.add(solicitudDesde(linea.split(SEPARADOR, -1)));
+            }
+        } catch (IOException | RuntimeException e) {
+            // Igual que la version inicial: ante el primer error se deja de leer (defecto E3).
+        }
+    }
+
+    private Solicitud solicitudDesde(String[] campos) {
+        Solicitud solicitud = new Solicitud();
+        solicitud.id = Integer.parseInt(campos[0]);
+        solicitud.legajo = campos[1];
+        solicitud.tipo = campos[2];
+        solicitud.desc = campos[3];
+        solicitud.prioridad = campos[4];
+        solicitud.estado = campos[5];
+        solicitud.responsable = campos[6];
+        solicitud.fechaAlta = campos[7];
+        solicitud.fechaVto = campos[8];
+        solicitud.fechaCierre = campos[9];
+        return solicitud;
+    }
+
+    /**
+     * Devuelve las lineas del archivo sin el encabezado. Si una linea no se puede convertir,
+     * el error corta la carga en el metodo que la llama, como en la version inicial.
+     */
+    private List<String> leerLineasDeDatos(String ruta) throws IOException {
+        List<String> lineas = new ArrayList<>();
+        try (BufferedReader lector = new BufferedReader(new FileReader(ruta))) {
+            lector.readLine();
+            String linea = lector.readLine();
+            while (linea != null) {
+                lineas.add(linea);
+                linea = lector.readLine();
+            }
+        }
+        return lineas;
+    }
+
+    private void guardar() {
+        try (FileWriter escritor = new FileWriter(ARCHIVO_SOLICITUDES)) {
+            escritor.write(ENCABEZADO_SOLICITUDES + "\n");
+            for (Solicitud solicitud : solicitudes) {
+                escritor.write(String.join(SEPARADOR, String.valueOf(solicitud.id), solicitud.legajo, solicitud.tipo,
+                        solicitud.desc, solicitud.prioridad, solicitud.estado, solicitud.responsable,
+                        solicitud.fechaAlta, solicitud.fechaVto, solicitud.fechaCierre) + "\n");
+            }
+        } catch (IOException e) {
+            System.out.println("Error al guardar");
         }
     }
 }
