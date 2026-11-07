@@ -59,7 +59,7 @@ public final class Solicitud {
     /** Aplica una transicion permitida; al cerrarse, registra la fecha de cierre. */
     public void cambiarEstado(EstadoSolicitud destino, LocalDate hoy) {
         verificarQueEsteAbierta();
-        if (estado == EstadoSolicitud.PENDIENTE && destino == EstadoSolicitud.EN_PROCESO && !tieneResponsable()) {
+        if (requiereResponsable(destino) && !tieneResponsable()) {
             throw new ReglaDeNegocioException("la solicitud debe tener un responsable asignado");
         }
         if (!estado.puedePasarA(destino)) {
@@ -69,6 +69,11 @@ public final class Solicitud {
         if (destino.estaCerrada()) {
             this.fechaDeCierre = hoy;
         }
+    }
+
+    /** Para empezar a trabajar una solicitud pendiente hace falta un responsable asignado. */
+    private boolean requiereResponsable(EstadoSolicitud destino) {
+        return estado == EstadoSolicitud.PENDIENTE && destino == EstadoSolicitud.EN_PROCESO;
     }
 
     public void verificarQueEsteAbierta() {

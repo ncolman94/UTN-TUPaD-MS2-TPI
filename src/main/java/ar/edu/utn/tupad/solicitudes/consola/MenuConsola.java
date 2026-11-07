@@ -28,6 +28,11 @@ public class MenuConsola {
     private final PrintStream salida;
     private final ServicioSolicitudes servicio;
     private final GeneradorDeReporte generadorDeReporte;
+    private final List<Opcion> opciones;
+
+    /** Una opcion del menu: el mismo registro sirve para mostrarla y para ejecutarla. */
+    private record Opcion(int numero, String texto, Runnable accion) {
+    }
 
     public MenuConsola(Scanner entrada, PrintStream salida, ServicioSolicitudes servicio,
                        GeneradorDeReporte generadorDeReporte) {
@@ -35,6 +40,14 @@ public class MenuConsola {
         this.salida = salida;
         this.servicio = servicio;
         this.generadorDeReporte = generadorDeReporte;
+        this.opciones = List.of(
+                new Opcion(1, "Registrar solicitud", this::registrarSolicitud),
+                new Opcion(2, "Asignar responsable", this::asignarResponsable),
+                new Opcion(3, "Cambiar estado", this::cambiarEstado),
+                new Opcion(4, "Buscar solicitudes", this::buscarSolicitudes),
+                new Opcion(5, "Reporte", this::mostrarReporte),
+                new Opcion(6, "Listar todas", this::listarTodas),
+                new Opcion(OPCION_SALIR, "Salir", () -> salida.println("Hasta luego")));
     }
 
     /** Muestra el menu hasta que el operador elige salir o se termina la entrada. */
@@ -54,28 +67,16 @@ public class MenuConsola {
     private void mostrarMenu() {
         salida.println();
         salida.println("===== GESTION DE SOLICITUDES ACADEMICAS =====");
-        salida.println("1. Registrar solicitud");
-        salida.println("2. Asignar responsable");
-        salida.println("3. Cambiar estado");
-        salida.println("4. Buscar solicitudes");
-        salida.println("5. Reporte");
-        salida.println("6. Listar todas");
-        salida.println("0. Salir");
+        opciones.forEach(opcion -> salida.println(opcion.numero() + ". " + opcion.texto()));
         salida.print("Opcion: ");
     }
 
-    private void ejecutar(int opcion) {
+    private void ejecutar(int numero) {
         try {
-            switch (opcion) {
-                case 1 -> registrarSolicitud();
-                case 2 -> asignarResponsable();
-                case 3 -> cambiarEstado();
-                case 4 -> buscarSolicitudes();
-                case 5 -> FormatoConsola.reporte(generadorDeReporte.generar()).forEach(salida::println);
-                case 6 -> listarTodas();
-                case OPCION_SALIR -> salida.println("Hasta luego");
-                default -> salida.println("Opcion invalida");
-            }
+            opciones.stream()
+                    .filter(opcion -> opcion.numero() == numero)
+                    .findFirst()
+                    .ifPresentOrElse(opcion -> opcion.accion().run(), () -> salida.println("Opcion invalida"));
         } catch (ReglaDeNegocioException e) {
             salida.println("Error: " + e.getMessage());
         } catch (ErrorDePersistencia e) {
@@ -90,7 +91,7 @@ public class MenuConsola {
         String urgente = preguntar("Urgente (s/n): ");
         Solicitud solicitud = servicio.registrar(new DatosNuevaSolicitud(legajo, tipo, descripcion,
                 urgente.equals(RESPUESTA_SI) || urgente.equals("S")));
-        salida.println("Solicitud #" + solicitud.numero() + " registrada. Prioridad: " + solicitud.prioridad()
+        salida.println(referencia(solicitud.numero()) + " registrada. Prioridad: " + solicitud.prioridad()
                 + ". Vence: " + FormatoConsola.fecha(solicitud.fechaDeVencimiento()));
     }
 
@@ -98,7 +99,7 @@ public class MenuConsola {
         int numero = numeroDeSolicitud(preguntar("Numero de solicitud: "));
         String idResponsable = preguntar("Id del responsable: ");
         Responsable responsable = servicio.asignarResponsable(numero, idResponsable);
-        salida.println("Solicitud #" + numero + " asignada a " + responsable.nombre() + " ("
+        salida.println(referencia(numero) + " asignada a " + responsable.nombre() + " ("
                 + responsable.area().etiqueta() + ")");
     }
 
@@ -107,7 +108,7 @@ public class MenuConsola {
         String estado = preguntar("Nuevo estado ("
                 + opciones(EstadoSolicitud.destinosPosibles().toArray(EstadoSolicitud[]::new)) + "): ");
         EstadoSolicitud nuevoEstado = servicio.cambiarEstado(numero, estado);
-        salida.println("Solicitud #" + numero + ": estado actualizado a " + nuevoEstado);
+        salida.println(referencia(numero) + ": estado actualizado a " + nuevoEstado);
     }
 
     private void buscarSolicitudes() {
@@ -124,6 +125,10 @@ public class MenuConsola {
         }
         salida.println("Se encontraron " + encontradas.size() + " solicitudes:");
         mostrar(encontradas);
+    }
+
+    private void mostrarReporte() {
+        FormatoConsola.reporte(generadorDeReporte.generar()).forEach(salida::println);
     }
 
     private void listarTodas() {
@@ -168,6 +173,10 @@ public class MenuConsola {
     /** La entrada se termino (por ejemplo, fin de archivo) antes de elegir "Salir". */
     private static final class FinDeEntrada extends RuntimeException {
         private static final long serialVersionUID = 1L;
+    }
+
+    private static String referencia(int numeroDeSolicitud) {
+        return "Solicitud #" + numeroDeSolicitud;
     }
 
     private static String opciones(Enum<?>[] valores) {

@@ -24,6 +24,8 @@ public final class App {
     private App() {
     }
 
+    // System.err es de la JVM: no se cierra (falso positivo de PMD, ver revision CR-06).
+    @SuppressWarnings("PMD.CloseResource")
     public static void main(String[] args) {
         PrintStream errores = System.err;
         try {
