@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ar.edu.utn.tupad.solicitudes.Fixtures;
+import ar.edu.utn.tupad.solicitudes.dominio.ErrorDePersistencia;
 import ar.edu.utn.tupad.solicitudes.dominio.EstadoSolicitud;
 import ar.edu.utn.tupad.solicitudes.dominio.Prioridad;
 import ar.edu.utn.tupad.solicitudes.dominio.ReglaDeNegocioException;
@@ -50,7 +51,7 @@ class ServicioSolicitudesTest {
                 () -> assertEquals(TipoSolicitud.EXAMEN, solicitud.tipo()),
                 () -> assertEquals(Prioridad.ALTA, solicitud.prioridad()),
                 () -> assertEquals(HOY.plusDays(2), solicitud.fechaDeVencimiento()),
-                () -> assertEquals(Optional.of(solicitud), repositorio.buscarPorNumero(8)));
+                () -> assertEquals(solicitud.datos(), repositorio.buscarPorNumero(8).orElseThrow().datos()));
     }
 
     @Test
@@ -79,6 +80,33 @@ class ServicioSolicitudesTest {
 
         assertEquals("no existe la solicitud #5", mensajeDeError(() -> servicio.asignarResponsable(5, "R01")));
         assertEquals("no existe el responsable R99", mensajeDeError(() -> servicio.asignarResponsable(1, "R99")));
+    }
+
+    @Test
+    @DisplayName("CR-08: si el guardado falla, la solicitud guardada no cambia")
+    void siFallaElGuardadoNoQuedaElCambio() {
+        RepositorioSolicitudesEnMemoria queFallaAlGuardar = new RepositorioSolicitudesEnMemoria() {
+            private boolean fallar;
+
+            @Override
+            public void guardar(Solicitud solicitud) {
+                if (fallar) {
+                    throw new ErrorDePersistencia("no se pudo escribir", null);
+                }
+                super.guardar(solicitud);
+                fallar = true;
+            }
+        };
+        queFallaAlGuardar.guardar(Fixtures.certificadoDeHoy(1));
+        ServicioSolicitudes conFallas =
+                new ServicioSolicitudes(queFallaAlGuardar, SOLO_EXISTE_1001, SOLO_EXISTE_R01, RELOJ_FIJO);
+
+        assertThrows(ErrorDePersistencia.class, () -> conFallas.asignarResponsable(1, "R01"));
+        assertThrows(ErrorDePersistencia.class, () -> conFallas.cambiarEstado(1, "RECHAZADA"));
+
+        Solicitud guardada = queFallaAlGuardar.buscarPorNumero(1).orElseThrow();
+        assertEquals(Optional.empty(), guardada.idResponsable());
+        assertEquals(EstadoSolicitud.PENDIENTE, guardada.estado());
     }
 
     @Test

@@ -43,12 +43,12 @@ public class RepositorioSolicitudesCsv implements RepositorioSolicitudes {
 
     @Override
     public List<Solicitud> todas() {
-        return List.copyOf(solicitudes);
+        return ListaDeSolicitudes.copias(solicitudes);
     }
 
     @Override
     public Optional<Solicitud> buscarPorNumero(int numero) {
-        return solicitudes.stream().filter(solicitud -> solicitud.numero() == numero).findFirst();
+        return ListaDeSolicitudes.copiaDe(solicitudes, numero);
     }
 
     @Override

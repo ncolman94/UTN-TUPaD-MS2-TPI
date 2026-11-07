@@ -96,6 +96,11 @@ public final class Solicitud {
                 : OptionalLong.empty();
     }
 
+    /** Una solicitud independiente con el mismo estado: modificarla no afecta a esta. */
+    public Solicitud copia() {
+        return new Solicitud(datos());
+    }
+
     public DatosDeSolicitud datos() {
         return new DatosDeSolicitud(numero, legajo, tipo, descripcion, prioridad, estado, idResponsable,
                 fechaDeAlta, fechaDeVencimiento, fechaDeCierre);

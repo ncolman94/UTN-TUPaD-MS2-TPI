@@ -2,7 +2,10 @@ package ar.edu.utn.tupad.solicitudes.dominio;
 
 import java.util.Optional;
 
-/** Almacenamiento de solicitudes. Las implementaciones deben poder usarse indistintamente. */
+/**
+ * Almacenamiento de solicitudes. Las implementaciones deben poder usarse indistintamente.
+ * Entregan y guardan copias: un cambio sobre una solicitud solo queda registrado al guardarla.
+ */
 public interface RepositorioSolicitudes extends ConsultaSolicitudes {
 
     Optional<Solicitud> buscarPorNumero(int numero);
