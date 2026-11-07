@@ -3,7 +3,11 @@ package ar.edu.utn.tupad.solicitudes;
 import ar.edu.utn.tupad.solicitudes.aplicacion.DatosNuevaSolicitud;
 import ar.edu.utn.tupad.solicitudes.aplicacion.FiltroSolicitudes;
 import ar.edu.utn.tupad.solicitudes.dominio.EstadoSolicitud;
+import ar.edu.utn.tupad.solicitudes.dominio.ReglaDeNegocioException;
+import ar.edu.utn.tupad.solicitudes.dominio.Responsable;
+import ar.edu.utn.tupad.solicitudes.dominio.Solicitud;
 import ar.edu.utn.tupad.solicitudes.dominio.TipoSolicitud;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.stream.Collectors;
@@ -11,6 +15,7 @@ import java.util.stream.Collectors;
 public class App {
 
     private static final int OPCION_SALIR = 0;
+    private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final GestorSolicitudes gestor;
     private final Scanner entrada;
@@ -49,15 +54,19 @@ public class App {
     }
 
     private void ejecutar(int opcion) {
-        switch (opcion) {
-            case 1 -> registrarSolicitud();
-            case 2 -> asignarResponsable();
-            case 3 -> cambiarEstado();
-            case 4 -> buscarSolicitudes();
-            case 5 -> gestor.reporte();
-            case 6 -> gestor.listar();
-            case OPCION_SALIR -> System.out.println("Hasta luego");
-            default -> System.out.println("Opcion invalida");
+        try {
+            switch (opcion) {
+                case 1 -> registrarSolicitud();
+                case 2 -> asignarResponsable();
+                case 3 -> cambiarEstado();
+                case 4 -> buscarSolicitudes();
+                case 5 -> gestor.reporte();
+                case 6 -> gestor.listar();
+                case OPCION_SALIR -> System.out.println("Hasta luego");
+                default -> System.out.println("Opcion invalida");
+            }
+        } catch (ReglaDeNegocioException e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 
@@ -66,21 +75,26 @@ public class App {
         String tipo = preguntar("Tipo (" + opciones(TipoSolicitud.values()) + "): ");
         String descripcion = preguntar("Descripcion: ");
         String urgente = preguntar("Urgente (s/n): ");
-        gestor.registrarSolicitud(new DatosNuevaSolicitud(legajo, tipo, descripcion,
+        Solicitud solicitud = gestor.registrarSolicitud(new DatosNuevaSolicitud(legajo, tipo, descripcion,
                 urgente.equals("s") || urgente.equals("S")));
+        System.out.println("Solicitud #" + solicitud.numero() + " registrada. Prioridad: " + solicitud.prioridad()
+                + ". Vence: " + solicitud.fechaDeVencimiento().format(FORMATO_FECHA));
     }
 
     private void asignarResponsable() {
         int numero = Integer.parseInt(preguntar("Numero de solicitud: "));
         String idResponsable = preguntar("Id del responsable: ");
-        gestor.asignarResponsable(numero, idResponsable);
+        Responsable responsable = gestor.asignarResponsable(numero, idResponsable);
+        System.out.println("Solicitud #" + numero + " asignada a " + responsable.nombre() + " ("
+                + responsable.area().etiqueta() + ")");
     }
 
     private void cambiarEstado() {
         int numero = Integer.parseInt(preguntar("Numero de solicitud: "));
         String estado = preguntar("Nuevo estado ("
                 + opciones(EstadoSolicitud.destinosPosibles().toArray(EstadoSolicitud[]::new)) + "): ");
-        gestor.cambiarEstado(numero, estado);
+        EstadoSolicitud nuevoEstado = gestor.cambiarEstado(numero, estado);
+        System.out.println("Solicitud #" + numero + ": estado actualizado a " + nuevoEstado);
     }
 
     private void buscarSolicitudes() {

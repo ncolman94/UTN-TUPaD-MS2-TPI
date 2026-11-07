@@ -45,14 +45,35 @@ public final class Solicitud {
         return new Solicitud(datos);
     }
 
+    /** Asigna un responsable del area que corresponde al tipo; no se permite en solicitudes cerradas. */
     public void asignar(Responsable responsable) {
+        verificarQueEsteAbierta();
+        Area areaRequerida = tipo.area();
+        if (!responsable.perteneceA(areaRequerida)) {
+            throw new ReglaDeNegocioException(
+                    responsable.nombre() + " no pertenece al area " + areaRequerida.etiqueta());
+        }
         this.idResponsable = responsable.id();
     }
 
+    /** Aplica una transicion permitida; al cerrarse, registra la fecha de cierre. */
     public void cambiarEstado(EstadoSolicitud destino, LocalDate hoy) {
+        verificarQueEsteAbierta();
+        if (estado == EstadoSolicitud.PENDIENTE && destino == EstadoSolicitud.EN_PROCESO && !tieneResponsable()) {
+            throw new ReglaDeNegocioException("la solicitud debe tener un responsable asignado");
+        }
+        if (!estado.puedePasarA(destino)) {
+            throw ReglaDeNegocioException.transicionInvalida(estado, destino.name());
+        }
         this.estado = destino;
         if (destino.estaCerrada()) {
             this.fechaDeCierre = hoy;
+        }
+    }
+
+    public void verificarQueEsteAbierta() {
+        if (estaCerrada()) {
+            throw new ReglaDeNegocioException("la solicitud #" + numero + " ya esta cerrada");
         }
     }
 

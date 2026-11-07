@@ -8,6 +8,7 @@ import ar.edu.utn.tupad.solicitudes.dominio.EstadoSolicitud;
 import ar.edu.utn.tupad.solicitudes.dominio.Estudiante;
 import ar.edu.utn.tupad.solicitudes.dominio.Pedido;
 import ar.edu.utn.tupad.solicitudes.dominio.Prioridad;
+import ar.edu.utn.tupad.solicitudes.dominio.ReglaDeNegocioException;
 import ar.edu.utn.tupad.solicitudes.dominio.Responsable;
 import ar.edu.utn.tupad.solicitudes.dominio.Solicitud;
 import ar.edu.utn.tupad.solicitudes.dominio.TipoSolicitud;
@@ -19,7 +20,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.OptionalDouble;
 
 /**
@@ -35,7 +35,6 @@ public class GestorSolicitudes {
             "id;legajo;tipo;descripcion;prioridad;estado;responsable;fechaAlta;fechaVencimiento;fechaCierre";
     private static final String SEPARADOR = ";";
     private static final String SIN_VALOR = "";
-    private static final int LARGO_MAXIMO_DESCRIPCION = 200;
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final List<Solicitud> solicitudes = new ArrayList<>();
@@ -50,71 +49,42 @@ public class GestorSolicitudes {
 
     // ---------------------------------------------------------------- casos de uso
 
-    public void registrarSolicitud(DatosNuevaSolicitud datos) {
-        Optional<TipoSolicitud> tipo = TipoSolicitud.desde(datos.tipo());
-        String error = validarNuevaSolicitud(datos.legajo(), tipo, datos.descripcion());
-        if (error != null) {
-            System.out.println("Error: " + error);
-            return;
+    /** Registra una solicitud nueva. Las validaciones siguen el orden: legajo, tipo, descripcion. */
+    public Solicitud registrarSolicitud(DatosNuevaSolicitud datos) {
+        if (!existeEstudiante(datos.legajo())) {
+            throw new ReglaDeNegocioException("no existe un estudiante con legajo " + datos.legajo());
         }
-        Pedido pedido = new Pedido(datos.legajo(), tipo.orElseThrow(), datos.descripcion().trim(), datos.urgente());
+        TipoSolicitud tipo = TipoSolicitud.desde(datos.tipo())
+                .orElseThrow(() -> new ReglaDeNegocioException("tipo de solicitud invalido"));
+        Pedido pedido = new Pedido(datos.legajo(), tipo, datos.descripcion(), datos.urgente());
         Solicitud solicitud = Solicitud.registrar(proximoNumero(), pedido, LocalDate.now());
         solicitudes.add(solicitud);
         guardar();
-        System.out.println("Solicitud #" + solicitud.numero() + " registrada. Prioridad: " + solicitud.prioridad()
-                + ". Vence: " + solicitud.fechaDeVencimiento().format(FORMATO_FECHA));
+        return solicitud;
     }
 
-    public void asignarResponsable(int numero, String idResponsable) {
-        Solicitud solicitud = buscarSolicitud(numero);
-        if (solicitud == null) {
-            System.out.println("Error: no existe la solicitud #" + numero);
-            return;
-        }
-        Responsable responsable = buscarResponsable(idResponsable);
-        if (responsable == null) {
-            System.out.println("Error: no existe el responsable " + idResponsable);
-            return;
-        }
-        if (solicitud.estaCerrada()) {
-            System.out.println("Error: la solicitud #" + numero + " ya esta cerrada");
-            return;
-        }
-        Area areaRequerida = solicitud.tipo().area();
-        if (!responsable.perteneceA(areaRequerida)) {
-            System.out.println("Error: " + responsable.nombre() + " no pertenece al area " + areaRequerida.etiqueta());
-            return;
-        }
+    /** Asigna un responsable y lo devuelve, para informar a quien se asigno. */
+    public Responsable asignarResponsable(int numero, String idResponsable) {
+        Solicitud solicitud = buscarExistente(numero);
+        Responsable responsable = responsables.stream()
+                .filter(r -> r.id().equalsIgnoreCase(idResponsable))
+                .findFirst()
+                .orElseThrow(() -> new ReglaDeNegocioException("no existe el responsable " + idResponsable));
         solicitud.asignar(responsable);
         guardar();
-        System.out.println("Solicitud #" + numero + " asignada a " + responsable.nombre() + " ("
-                + responsable.area().etiqueta() + ")");
+        return responsable;
     }
 
-    public void cambiarEstado(int numero, String estadoIngresado) {
-        Solicitud solicitud = buscarSolicitud(numero);
-        if (solicitud == null) {
-            System.out.println("Error: no existe la solicitud #" + numero);
-            return;
-        }
-        if (solicitud.estaCerrada()) {
-            System.out.println("Error: la solicitud #" + numero + " ya esta cerrada");
-            return;
-        }
-        Optional<EstadoSolicitud> destino = EstadoSolicitud.desde(estadoIngresado);
-        if (solicitud.estado() == EstadoSolicitud.PENDIENTE && destino.equals(Optional.of(EstadoSolicitud.EN_PROCESO))
-                && !solicitud.tieneResponsable()) {
-            System.out.println("Error: la solicitud debe tener un responsable asignado");
-            return;
-        }
-        if (destino.isEmpty() || !solicitud.estado().puedePasarA(destino.get())) {
-            System.out.println("Error: no se puede pasar de " + solicitud.estado() + " a "
-                    + EstadoSolicitud.normalizar(estadoIngresado));
-            return;
-        }
-        solicitud.cambiarEstado(destino.get(), LocalDate.now());
+    /** Cambia el estado y devuelve el estado nuevo. */
+    public EstadoSolicitud cambiarEstado(int numero, String estadoIngresado) {
+        Solicitud solicitud = buscarExistente(numero);
+        solicitud.verificarQueEsteAbierta();
+        EstadoSolicitud destino = EstadoSolicitud.desde(estadoIngresado)
+                .orElseThrow(() -> ReglaDeNegocioException.transicionInvalida(solicitud.estado(),
+                        EstadoSolicitud.normalizar(estadoIngresado)));
+        solicitud.cambiarEstado(destino, LocalDate.now());
         guardar();
-        System.out.println("Solicitud #" + numero + ": estado actualizado a " + solicitud.estado());
+        return destino;
     }
 
     public void buscar(FiltroSolicitudes filtro) {
@@ -160,23 +130,6 @@ public class GestorSolicitudes {
 
     // ---------------------------------------------------------------- reglas de negocio
 
-    /** Devuelve el mensaje de error de la primera validacion que falla, o null si los datos son validos. */
-    private String validarNuevaSolicitud(String legajo, Optional<TipoSolicitud> tipo, String descripcion) {
-        if (!existeEstudiante(legajo)) {
-            return "no existe un estudiante con legajo " + legajo;
-        }
-        if (tipo.isEmpty()) {
-            return "tipo de solicitud invalido";
-        }
-        if (descripcion == null || descripcion.trim().isEmpty()) {
-            return "la descripcion es obligatoria";
-        }
-        if (descripcion.length() > LARGO_MAXIMO_DESCRIPCION) {
-            return "la descripcion no puede superar los " + LARGO_MAXIMO_DESCRIPCION + " caracteres";
-        }
-        return null;
-    }
-
     private String promedioDeResolucionComoTexto() {
         OptionalDouble promedio = solicitudes.stream()
                 .map(Solicitud::diasDeResolucion)
@@ -188,12 +141,11 @@ public class GestorSolicitudes {
 
     // ---------------------------------------------------------------- busquedas
 
-    private Solicitud buscarSolicitud(int numero) {
-        return solicitudes.stream().filter(s -> s.numero() == numero).findFirst().orElse(null);
-    }
-
-    private Responsable buscarResponsable(String idResponsable) {
-        return responsables.stream().filter(r -> r.id().equalsIgnoreCase(idResponsable)).findFirst().orElse(null);
+    private Solicitud buscarExistente(int numero) {
+        return solicitudes.stream()
+                .filter(s -> s.numero() == numero)
+                .findFirst()
+                .orElseThrow(() -> new ReglaDeNegocioException("no existe la solicitud #" + numero));
     }
 
     private boolean existeEstudiante(String legajo) {
