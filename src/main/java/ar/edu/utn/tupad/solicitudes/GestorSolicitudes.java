@@ -1,5 +1,7 @@
 package ar.edu.utn.tupad.solicitudes;
 
+import ar.edu.utn.tupad.solicitudes.aplicacion.DatosNuevaSolicitud;
+import ar.edu.utn.tupad.solicitudes.aplicacion.FiltroSolicitudes;
 import ar.edu.utn.tupad.solicitudes.dominio.Area;
 import ar.edu.utn.tupad.solicitudes.dominio.DatosDeSolicitud;
 import ar.edu.utn.tupad.solicitudes.dominio.EstadoSolicitud;
@@ -48,14 +50,14 @@ public class GestorSolicitudes {
 
     // ---------------------------------------------------------------- casos de uso
 
-    public void registrarSolicitud(String legajo, String tipoIngresado, String descripcion, boolean urgente) {
-        Optional<TipoSolicitud> tipo = TipoSolicitud.desde(tipoIngresado);
-        String error = validarNuevaSolicitud(legajo, tipo, descripcion);
+    public void registrarSolicitud(DatosNuevaSolicitud datos) {
+        Optional<TipoSolicitud> tipo = TipoSolicitud.desde(datos.tipo());
+        String error = validarNuevaSolicitud(datos.legajo(), tipo, datos.descripcion());
         if (error != null) {
             System.out.println("Error: " + error);
             return;
         }
-        Pedido pedido = new Pedido(legajo, tipo.orElseThrow(), descripcion.trim(), urgente);
+        Pedido pedido = new Pedido(datos.legajo(), tipo.orElseThrow(), datos.descripcion().trim(), datos.urgente());
         Solicitud solicitud = Solicitud.registrar(proximoNumero(), pedido, LocalDate.now());
         solicitudes.add(solicitud);
         guardar();
@@ -115,14 +117,9 @@ public class GestorSolicitudes {
         System.out.println("Solicitud #" + numero + ": estado actualizado a " + solicitud.estado());
     }
 
-    public void buscar(String estado, String tipo, String legajo, String prioridad, boolean soloVencidas) {
+    public void buscar(FiltroSolicitudes filtro) {
         LocalDate hoy = LocalDate.now();
-        List<Solicitud> encontradas = new ArrayList<>();
-        for (Solicitud solicitud : solicitudes) {
-            if (cumpleFiltro(solicitud, estado, tipo, legajo, prioridad, soloVencidas, hoy)) {
-                encontradas.add(solicitud);
-            }
-        }
+        List<Solicitud> encontradas = solicitudes.stream().filter(s -> filtro.admite(s, hoy)).toList();
         if (encontradas.isEmpty()) {
             System.out.println("No se encontraron solicitudes");
             return;
@@ -178,23 +175,6 @@ public class GestorSolicitudes {
             return "la descripcion no puede superar los " + LARGO_MAXIMO_DESCRIPCION + " caracteres";
         }
         return null;
-    }
-
-    private boolean cumpleFiltro(Solicitud solicitud, String estado, String tipo, String legajo, String prioridad,
-                                 boolean soloVencidas, LocalDate hoy) {
-        return coincideSinMayusculas(estado, solicitud.estado().name())
-                && coincideSinMayusculas(tipo, solicitud.tipo().name())
-                && (sinCriterio(legajo) || solicitud.legajo().equals(legajo))
-                && coincideSinMayusculas(prioridad, solicitud.prioridad().name())
-                && (!soloVencidas || solicitud.estaVencida(hoy));
-    }
-
-    private boolean coincideSinMayusculas(String criterio, String valor) {
-        return sinCriterio(criterio) || valor.equalsIgnoreCase(criterio);
-    }
-
-    private boolean sinCriterio(String criterio) {
-        return criterio == null || criterio.isEmpty();
     }
 
     private String promedioDeResolucionComoTexto() {

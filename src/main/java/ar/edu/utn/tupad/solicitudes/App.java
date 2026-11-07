@@ -1,5 +1,7 @@
 package ar.edu.utn.tupad.solicitudes;
 
+import ar.edu.utn.tupad.solicitudes.aplicacion.DatosNuevaSolicitud;
+import ar.edu.utn.tupad.solicitudes.aplicacion.FiltroSolicitudes;
 import ar.edu.utn.tupad.solicitudes.dominio.EstadoSolicitud;
 import ar.edu.utn.tupad.solicitudes.dominio.TipoSolicitud;
 import java.util.Arrays;
@@ -64,7 +66,8 @@ public class App {
         String tipo = preguntar("Tipo (" + opciones(TipoSolicitud.values()) + "): ");
         String descripcion = preguntar("Descripcion: ");
         String urgente = preguntar("Urgente (s/n): ");
-        gestor.registrarSolicitud(legajo, tipo, descripcion, urgente.equals("s") || urgente.equals("S"));
+        gestor.registrarSolicitud(new DatosNuevaSolicitud(legajo, tipo, descripcion,
+                urgente.equals("s") || urgente.equals("S")));
     }
 
     private void asignarResponsable() {
@@ -81,12 +84,13 @@ public class App {
     }
 
     private void buscarSolicitudes() {
-        String estado = preguntar("Estado (enter para omitir): ");
-        String tipo = preguntar("Tipo (enter para omitir): ");
-        String legajo = preguntar("Legajo (enter para omitir): ");
-        String prioridad = preguntar("Prioridad (enter para omitir): ");
-        String soloVencidas = preguntar("Solo vencidas (s/n): ");
-        gestor.buscar(estado, tipo, legajo, prioridad, soloVencidas.equalsIgnoreCase("s"));
+        FiltroSolicitudes filtro = FiltroSolicitudes.sinCriterios()
+                .conEstado(preguntar("Estado (enter para omitir): "))
+                .conTipo(preguntar("Tipo (enter para omitir): "))
+                .conLegajo(preguntar("Legajo (enter para omitir): "))
+                .conPrioridad(preguntar("Prioridad (enter para omitir): "))
+                .conSoloVencidas(preguntar("Solo vencidas (s/n): ").equalsIgnoreCase("s"));
+        gestor.buscar(filtro);
     }
 
     private static String opciones(Enum<?>[] valores) {
