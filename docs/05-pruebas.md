@@ -8,8 +8,8 @@ cuatro niveles, cada uno con una herramienta distinta:
 | Nivel | Qué verifica | Herramienta | Casos |
 |---|---|---|---:|
 | 1. Caracterización (golden master) | Que la versión actual se comporta **igual** que la inicial: pantalla, código de salida y los tres CSV | `PruebaDeCaracterizacionTest`: ejecuta ambas versiones como procesos con la misma entrada | 17 |
-| 2. Cambios intencionales | Que los defectos E1, E2 y E3 se corrigieron, y cómo fallaba la versión inicial | `CambiosIntencionalesTest`: ejecuta ambas versiones y documenta la diferencia | 5 |
-| 3. Unitarias (patrón AAA) | Cada regla por separado, sin archivos ni consola, con fecha fija | JUnit 5 sobre dominio, aplicación, persistencia y consola | 105 (+1 deshabilitada) |
+| 2. Cambios intencionales | Que los defectos E1, E2, E3 y CR-02 se corrigieron, y cómo fallaba la versión inicial | `CambiosIntencionalesTest`: ejecuta ambas versiones y documenta la diferencia | 6 |
+| 3. Unitarias (patrón AAA) | Cada regla por separado, sin archivos ni consola, con fecha fija | JUnit 5 sobre dominio, aplicación, persistencia y consola | 110 |
 | 4. Contrato (LSP) | Que las dos implementaciones del repositorio son intercambiables | `ContratoRepositorioSolicitudes`, heredada por la prueba CSV y la de memoria | incluidas en 3 |
 
 Además, la integración continua ([.github/workflows/ci.yml](../.github/workflows/ci.yml)) corre todo en cada
@@ -60,6 +60,10 @@ salida completa en [evidencias/pruebas/caracterizacion](evidencias/pruebas/carac
 | `d609c88` | R7 - Replace Error Code with Exception | 17/17 |
 | `d75a628` | R8 - Extract Class, Extract Interface, inyección de dependencias | 17/17 |
 | `ae2ab70` | Corrección de E1, E2 y E3 | 17/17 + 5/5 cambios intencionales |
+| `a09eaa7` | Revisión CR-02: punto y coma | 17/17 + 6/6 |
+| `2a8fe39` | Revisión CR-03: fechas inexistentes | 17/17 + 6/6 |
+| `7e4ed12` | Revisión CR-08: repositorios con copias | 17/17 + 6/6 |
+| `23efc13` | Revisión CR-01, CR-04, CR-05: menú como tabla | 17/17 + 6/6 |
 
 ## Cambios de comportamiento intencionales
 
@@ -73,6 +77,7 @@ Son los únicos casos en que la salida cambia. Cada uno tiene su evidencia en
 | CI-3 | La entrada termina sin elegir "Salir" | `NoSuchElementException` (código 1) | Termina sin error |
 | CI-4 | No se puede escribir `solicitudes.csv` | "Error al guardar" **y** "Solicitud #9 registrada"; la solicitud aparece en el listado aunque no se guardó | "Error al guardar: no se pudo escribir datos/solicitudes.csv. El cambio no quedo guardado." y no aparece |
 | CI-5 | Línea mal formada en `solicitudes.csv` | Lista 3 de 8 solicitudes; al registrar otra **reescribe el archivo, borra las #4 a #8 y reutiliza el número #4** | Avisa la línea ignorada, lista las 8 y asigna el #9 |
+| CI-6 | Descripción con `;` (revisión CR-02) | La guarda; al reiniciar la muestra con los campos corridos (prioridad " urgente", estado MEDIA, responsable "PENDIENTE") | "Error: la descripcion no puede contener ';'" y el archivo no cambia |
 
 ### Comparación de las demos antes y después
 
@@ -94,13 +99,13 @@ un `Clock` fijo (7/11/2026), así que el resultado no depende del día en que se
 | `TipoSolicitudTest` | Prioridad, plazo y área de los 5 tipos, normal y urgente (tabla de 10 filas); plazo mínimo; interpretación del texto |
 | `EstadoSolicitudTest` | Las 16 combinaciones de transición; abiertas y cerradas; destinos posibles |
 | `PrioridadYAreaTest` | Elevar prioridad; etiquetas de área; pertenencia del responsable |
-| `PedidoTest` | Descripción obligatoria (nula, vacía, espacios), límite de 200, recorte |
+| `PedidoTest` | Descripción obligatoria (nula, vacía, espacios), límite de 200, punto y coma (CR-02), recorte |
 | `SolicitudTest` | Registro, restauración, asignación (área y cerrada), cambio de estado, fecha de cierre, días de resolución, bordes del vencimiento (vence hoy / ayer) |
 | `FiltroSolicitudesTest` | Cada criterio, combinación, legajo exacto, criterio nulo |
 | `GeneradorDeReporteTest` | Ceros sin datos; conteos por estado, tipo y área; promedio solo de resueltas |
-| `ServicioSolicitudesTest` | Número consecutivo, orden de validaciones, errores de inexistencia, estado desconocido, búsqueda con la fecha del reloj |
-| `ContratoRepositorioSolicitudes` (CSV y memoria) | Vacío, orden, próximo número, reemplazo sin duplicar, lista no modificable |
-| `RepositorioSolicitudesCsvTest` | Ida y vuelta con el formato original, líneas mal formadas, fallo de escritura |
+| `ServicioSolicitudesTest` | Número consecutivo, orden de validaciones, errores de inexistencia, estado desconocido, búsqueda con la fecha del reloj, guardado que falla (CR-08) |
+| `ContratoRepositorioSolicitudes` (CSV y memoria) | Vacío, orden, próximo número, reemplazo sin duplicar, lista no modificable, entrega de copias (CR-08) |
+| `RepositorioSolicitudesCsvTest` | Ida y vuelta con el formato original, líneas mal formadas, fechas inexistentes (CR-03), fallo de escritura |
 | `RepositoriosDeConsultaCsvTest` | Legajo exacto, id sin mayúsculas, área desconocida, archivo inexistente |
 | `MenuConsolaTest` | Flujo completo, prefijo "Error:", entrada no numérica, fin de entrada, fallo de guardado, reporte |
 
@@ -111,7 +116,7 @@ Detalle por clase y cobertura por clase en
 
 | Indicador | Versión inicial | Versión actual |
 |---|---:|---:|
-| Pruebas automatizadas | 0 | 128 (127 pasan, 1 deshabilitada) |
+| Pruebas automatizadas | 0 | 133 (todas pasan) |
 | Cobertura de líneas | 0% | 95% |
 | Cobertura de ramas | 0% | 98% |
 
@@ -122,12 +127,13 @@ como proceso separado, al que JaCoCo no llega.
 
 Al probar líneas mal formadas, la fecha `31/02/2026` **no** se rechazó: el formato `dd/MM/yyyy` de Java la
 ajusta en silencio a `28/02/2026`. La versión inicial hace lo mismo. Se registró como observación **CR-03** del
-code review y la prueba `rechazaFechasQueNoExisten` quedó deshabilitada con esa referencia hasta su corrección
+code review y la prueba `rechazaFechasQueNoExisten` quedó deshabilitada con esa referencia (tag
+`etapa-pruebas`: 128 pruebas, 1 deshabilitada). Se corrigió en el commit `2a8fe39` y la prueba se habilitó
 (ver [06-code-review](06-code-review/revision.md)).
 
 ## Cómo reproducir
 
 ```bash
-./mvnw verify                    # 128 pruebas + reporte de cobertura en target/site/jacoco/index.html
+./mvnw verify                    # 133 pruebas + reporte de cobertura en target/site/jacoco/index.html
 scripts/generar_evidencias.sh    # regenera todo docs/evidencias
 ```

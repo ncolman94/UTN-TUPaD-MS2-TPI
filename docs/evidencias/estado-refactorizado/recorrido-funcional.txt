@@ -1,4 +1,4 @@
-### Version: etapa-refactoring - ejecutado el 07/11/2026
+### Version: etapa-pruebas-5-g03b698d - ejecutado el 07/11/2026
 ### Entrada (una linea por dato ingresado):
 >  6
 >  1

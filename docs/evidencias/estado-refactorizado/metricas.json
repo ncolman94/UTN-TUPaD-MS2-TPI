@@ -2,7 +2,7 @@
   "archivos": [
     {
       "archivo": "ar/edu/utn/tupad/solicitudes/App.java",
-      "loc": 37,
+      "loc": 38,
       "metodos": 3,
       "metodo_mas_largo": "armarMenu (11)",
       "max_lineas_metodo": 11,
@@ -72,12 +72,12 @@
     },
     {
       "archivo": "ar/edu/utn/tupad/solicitudes/consola/MenuConsola.java",
-      "loc": 153,
-      "metodos": 15,
-      "metodo_mas_largo": "ejecutar (18)",
-      "max_lineas_metodo": 18,
+      "loc": 158,
+      "metodos": 17,
+      "metodo_mas_largo": "MenuConsola (15)",
+      "max_lineas_metodo": 15,
       "max_parametros": 4,
-      "max_complejidad": 10,
+      "max_complejidad": 3,
       "literales_de_regla": 0
     },
     {
@@ -142,7 +142,7 @@
     },
     {
       "archivo": "ar/edu/utn/tupad/solicitudes/dominio/Pedido.java",
-      "loc": 14,
+      "loc": 18,
       "metodos": 0,
       "metodo_mas_largo": "-",
       "max_lineas_metodo": 0,
@@ -212,12 +212,12 @@
     },
     {
       "archivo": "ar/edu/utn/tupad/solicitudes/dominio/Solicitud.java",
-      "loc": 107,
-      "metodos": 19,
+      "loc": 113,
+      "metodos": 21,
       "metodo_mas_largo": "cambiarEstado (13)",
       "max_lineas_metodo": 13,
       "max_parametros": 3,
-      "max_complejidad": 6,
+      "max_complejidad": 5,
       "literales_de_regla": 0
     },
     {
@@ -242,10 +242,10 @@
     },
     {
       "archivo": "ar/edu/utn/tupad/solicitudes/persistencia/ListaDeSolicitudes.java",
-      "loc": 16,
-      "metodos": 2,
-      "metodo_mas_largo": "agregarOReemplazar (9)",
-      "max_lineas_metodo": 9,
+      "loc": 24,
+      "metodos": 4,
+      "metodo_mas_largo": "copias (12)",
+      "max_lineas_metodo": 12,
       "max_parametros": 2,
       "max_complejidad": 3,
       "literales_de_regla": 0
@@ -272,7 +272,7 @@
     },
     {
       "archivo": "ar/edu/utn/tupad/solicitudes/persistencia/RepositorioSolicitudesCsv.java",
-      "loc": 78,
+      "loc": 80,
       "metodos": 11,
       "metodo_mas_largo": "guardar (11)",
       "max_lineas_metodo": 11,
@@ -293,12 +293,12 @@
   ],
   "total": {
     "archivos": 29,
-    "loc": 917,
-    "loc_archivo_mas_grande": 153,
-    "metodos": 105,
+    "loc": 943,
+    "loc_archivo_mas_grande": 158,
+    "metodos": 111,
     "max_lineas_metodo": 20,
     "max_parametros": 4,
-    "max_complejidad": 10,
+    "max_complejidad": 7,
     "literales_de_regla": 0
   }
 }

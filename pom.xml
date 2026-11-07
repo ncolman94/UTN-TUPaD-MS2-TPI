@@ -6,7 +6,7 @@
 
     <groupId>ar.edu.utn.tupad</groupId>
     <artifactId>gestor-solicitudes</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
     <name>Gestor de Solicitudes Academicas</name>
 
