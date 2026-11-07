@@ -1,0 +1,66 @@
+Escenario: 14-sin-solicitudes
+Resultado: IDENTICO
+Entrada: 6 | 5 | 4 |  |  |  |  | n | 0
+Codigo de salida (inicial / actual): 0 / 0
+
+----- Salida de la version actual -----
+
+===== GESTION DE SOLICITUDES ACADEMICAS =====
+1. Registrar solicitud
+2. Asignar responsable
+3. Cambiar estado
+4. Buscar solicitudes
+5. Reporte
+6. Listar todas
+0. Salir
+Opcion: No hay solicitudes cargadas
+
+===== GESTION DE SOLICITUDES ACADEMICAS =====
+1. Registrar solicitud
+2. Asignar responsable
+3. Cambiar estado
+4. Buscar solicitudes
+5. Reporte
+6. Listar todas
+0. Salir
+Opcion: ===== REPORTE DE SOLICITUDES =====
+Total de solicitudes: 0
+-- Por estado --
+PENDIENTE: 0
+EN_PROCESO: 0
+RESUELTA: 0
+RECHAZADA: 0
+-- Por tipo --
+CERTIFICADO: 0
+EXAMEN: 0
+EQUIVALENCIA: 0
+REVISION: 0
+BAJA: 0
+-- Por area --
+BEDELIA: 0
+SECRETARIA ACADEMICA: 0
+Vencidas sin resolver: 0
+Tiempo promedio de resolucion: sin datos
+
+===== GESTION DE SOLICITUDES ACADEMICAS =====
+1. Registrar solicitud
+2. Asignar responsable
+3. Cambiar estado
+4. Buscar solicitudes
+5. Reporte
+6. Listar todas
+0. Salir
+Opcion: Estado (enter para omitir): Tipo (enter para omitir): Legajo (enter para omitir): Prioridad (enter para omitir): Solo vencidas (s/n): No se encontraron solicitudes
+
+===== GESTION DE SOLICITUDES ACADEMICAS =====
+1. Registrar solicitud
+2. Asignar responsable
+3. Cambiar estado
+4. Buscar solicitudes
+5. Reporte
+6. Listar todas
+0. Salir
+Opcion: Hasta luego
+
+----- datos/solicitudes.csv de la version actual -----
+id;legajo;tipo;descripcion;prioridad;estado;responsable;fechaAlta;fechaVencimiento;fechaCierre

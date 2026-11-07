@@ -1,0 +1,51 @@
+Escenario: 15-sin-archivo-y-primer-registro
+Resultado: IDENTICO
+Entrada: 6 | 1 | 1001 | EXAMEN | Constancia de examen final | n | 6 | 0
+Codigo de salida (inicial / actual): 0 / 0
+
+----- Salida de la version actual -----
+
+===== GESTION DE SOLICITUDES ACADEMICAS =====
+1. Registrar solicitud
+2. Asignar responsable
+3. Cambiar estado
+4. Buscar solicitudes
+5. Reporte
+6. Listar todas
+0. Salir
+Opcion: No hay solicitudes cargadas
+
+===== GESTION DE SOLICITUDES ACADEMICAS =====
+1. Registrar solicitud
+2. Asignar responsable
+3. Cambiar estado
+4. Buscar solicitudes
+5. Reporte
+6. Listar todas
+0. Salir
+Opcion: Legajo: Tipo (CERTIFICADO/EXAMEN/EQUIVALENCIA/REVISION/BAJA): Descripcion: Urgente (s/n): Solicitud #1 registrada. Prioridad: MEDIA. Vence: 12/11/2026
+
+===== GESTION DE SOLICITUDES ACADEMICAS =====
+1. Registrar solicitud
+2. Asignar responsable
+3. Cambiar estado
+4. Buscar solicitudes
+5. Reporte
+6. Listar todas
+0. Salir
+Opcion: Solicitudes registradas: 1
+#1 | EXAMEN | MEDIA | PENDIENTE | Leg: 1001 | Resp: - | Vence: 12/11/2026 | Constancia de examen final
+
+===== GESTION DE SOLICITUDES ACADEMICAS =====
+1. Registrar solicitud
+2. Asignar responsable
+3. Cambiar estado
+4. Buscar solicitudes
+5. Reporte
+6. Listar todas
+0. Salir
+Opcion: Hasta luego
+
+----- datos/solicitudes.csv de la version actual -----
+id;legajo;tipo;descripcion;prioridad;estado;responsable;fechaAlta;fechaVencimiento;fechaCierre
+1;1001;EXAMEN;Constancia de examen final;MEDIA;PENDIENTE;;07/11/2026;12/11/2026;

@@ -1,0 +1,304 @@
+{
+  "archivos": [
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/App.java",
+      "loc": 37,
+      "metodos": 3,
+      "metodo_mas_largo": "armarMenu (11)",
+      "max_lineas_metodo": 11,
+      "max_parametros": 1,
+      "max_complejidad": 2,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/aplicacion/DatosNuevaSolicitud.java",
+      "loc": 3,
+      "metodos": 0,
+      "metodo_mas_largo": "-",
+      "max_lineas_metodo": 0,
+      "max_parametros": 0,
+      "max_complejidad": 0,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/aplicacion/FiltroSolicitudes.java",
+      "loc": 41,
+      "metodos": 8,
+      "metodo_mas_largo": "admite (7)",
+      "max_lineas_metodo": 7,
+      "max_parametros": 2,
+      "max_complejidad": 7,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/aplicacion/GeneradorDeReporte.java",
+      "loc": 48,
+      "metodos": 3,
+      "metodo_mas_largo": "generar (15)",
+      "max_lineas_metodo": 15,
+      "max_parametros": 3,
+      "max_complejidad": 3,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/aplicacion/ReporteSolicitudes.java",
+      "loc": 13,
+      "metodos": 0,
+      "metodo_mas_largo": "-",
+      "max_lineas_metodo": 0,
+      "max_parametros": 0,
+      "max_complejidad": 0,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/aplicacion/ServicioSolicitudes.java",
+      "loc": 69,
+      "metodos": 8,
+      "metodo_mas_largo": "registrar (11)",
+      "max_lineas_metodo": 11,
+      "max_parametros": 4,
+      "max_complejidad": 2,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/consola/FormatoConsola.java",
+      "loc": 52,
+      "metodos": 5,
+      "metodo_mas_largo": "reporte (20)",
+      "max_lineas_metodo": 20,
+      "max_parametros": 1,
+      "max_complejidad": 4,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/consola/MenuConsola.java",
+      "loc": 153,
+      "metodos": 15,
+      "metodo_mas_largo": "ejecutar (18)",
+      "max_lineas_metodo": 18,
+      "max_parametros": 4,
+      "max_complejidad": 10,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/dominio/Area.java",
+      "loc": 19,
+      "metodos": 2,
+      "metodo_mas_largo": "desdeEtiqueta (6)",
+      "max_lineas_metodo": 6,
+      "max_parametros": 1,
+      "max_complejidad": 1,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/dominio/ConsultaSolicitudes.java",
+      "loc": 5,
+      "metodos": 0,
+      "metodo_mas_largo": "-",
+      "max_lineas_metodo": 0,
+      "max_parametros": 0,
+      "max_complejidad": 0,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/dominio/DatosDeSolicitud.java",
+      "loc": 6,
+      "metodos": 0,
+      "metodo_mas_largo": "-",
+      "max_lineas_metodo": 0,
+      "max_parametros": 0,
+      "max_complejidad": 0,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/dominio/ErrorDePersistencia.java",
+      "loc": 7,
+      "metodos": 1,
+      "metodo_mas_largo": "ErrorDePersistencia (3)",
+      "max_lineas_metodo": 3,
+      "max_parametros": 2,
+      "max_complejidad": 1,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/dominio/EstadoSolicitud.java",
+      "loc": 34,
+      "metodos": 6,
+      "metodo_mas_largo": "puedePasarA (7)",
+      "max_lineas_metodo": 7,
+      "max_parametros": 1,
+      "max_complejidad": 5,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/dominio/Estudiante.java",
+      "loc": 3,
+      "metodos": 0,
+      "metodo_mas_largo": "-",
+      "max_lineas_metodo": 0,
+      "max_parametros": 0,
+      "max_complejidad": 0,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/dominio/Pedido.java",
+      "loc": 14,
+      "metodos": 0,
+      "metodo_mas_largo": "-",
+      "max_lineas_metodo": 0,
+      "max_parametros": 0,
+      "max_complejidad": 0,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/dominio/Prioridad.java",
+      "loc": 9,
+      "metodos": 1,
+      "metodo_mas_largo": "elevada (3)",
+      "max_lineas_metodo": 3,
+      "max_parametros": 0,
+      "max_complejidad": 2,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/dominio/ReglaDeNegocioException.java",
+      "loc": 10,
+      "metodos": 2,
+      "metodo_mas_largo": "ReglaDeNegocioException (3)",
+      "max_lineas_metodo": 3,
+      "max_parametros": 2,
+      "max_complejidad": 1,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/dominio/RepositorioEstudiantes.java",
+      "loc": 5,
+      "metodos": 0,
+      "metodo_mas_largo": "-",
+      "max_lineas_metodo": 0,
+      "max_parametros": 0,
+      "max_complejidad": 0,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/dominio/RepositorioResponsables.java",
+      "loc": 6,
+      "metodos": 0,
+      "metodo_mas_largo": "-",
+      "max_lineas_metodo": 0,
+      "max_parametros": 0,
+      "max_complejidad": 0,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/dominio/RepositorioSolicitudes.java",
+      "loc": 7,
+      "metodos": 0,
+      "metodo_mas_largo": "-",
+      "max_lineas_metodo": 0,
+      "max_parametros": 0,
+      "max_complejidad": 0,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/dominio/Responsable.java",
+      "loc": 6,
+      "metodos": 1,
+      "metodo_mas_largo": "perteneceA (3)",
+      "max_lineas_metodo": 3,
+      "max_parametros": 1,
+      "max_complejidad": 1,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/dominio/Solicitud.java",
+      "loc": 107,
+      "metodos": 19,
+      "metodo_mas_largo": "cambiarEstado (13)",
+      "max_lineas_metodo": 13,
+      "max_parametros": 3,
+      "max_complejidad": 6,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/dominio/TipoSolicitud.java",
+      "loc": 33,
+      "metodos": 4,
+      "metodo_mas_largo": "desde (4)",
+      "max_lineas_metodo": 4,
+      "max_parametros": 1,
+      "max_complejidad": 2,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/persistencia/ArchivoCsv.java",
+      "loc": 73,
+      "metodos": 6,
+      "metodo_mas_largo": "leer (14)",
+      "max_lineas_metodo": 14,
+      "max_parametros": 4,
+      "max_complejidad": 4,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/persistencia/ListaDeSolicitudes.java",
+      "loc": 16,
+      "metodos": 2,
+      "metodo_mas_largo": "agregarOReemplazar (9)",
+      "max_lineas_metodo": 9,
+      "max_parametros": 2,
+      "max_complejidad": 3,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/persistencia/RepositorioEstudiantesCsv.java",
+      "loc": 18,
+      "metodos": 2,
+      "metodo_mas_largo": "RepositorioEstudiantesCsv (4)",
+      "max_lineas_metodo": 4,
+      "max_parametros": 2,
+      "max_complejidad": 1,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/persistencia/RepositorioResponsablesCsv.java",
+      "loc": 20,
+      "metodos": 2,
+      "metodo_mas_largo": "RepositorioResponsablesCsv (4)",
+      "max_lineas_metodo": 4,
+      "max_parametros": 2,
+      "max_complejidad": 1,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/persistencia/RepositorioSolicitudesCsv.java",
+      "loc": 78,
+      "metodos": 11,
+      "metodo_mas_largo": "guardar (11)",
+      "max_lineas_metodo": 11,
+      "max_parametros": 2,
+      "max_complejidad": 2,
+      "literales_de_regla": 0
+    },
+    {
+      "archivo": "ar/edu/utn/tupad/solicitudes/persistencia/RepositorioSolicitudesEnMemoria.java",
+      "loc": 25,
+      "metodos": 4,
+      "metodo_mas_largo": "todas (3)",
+      "max_lineas_metodo": 3,
+      "max_parametros": 1,
+      "max_complejidad": 1,
+      "literales_de_regla": 0
+    }
+  ],
+  "total": {
+    "archivos": 29,
+    "loc": 917,
+    "loc_archivo_mas_grande": 153,
+    "metodos": 105,
+    "max_lineas_metodo": 20,
+    "max_parametros": 4,
+    "max_complejidad": 10,
+    "literales_de_regla": 0
+  }
+}

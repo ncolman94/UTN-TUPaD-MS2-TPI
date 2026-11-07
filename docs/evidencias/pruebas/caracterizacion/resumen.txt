@@ -1,0 +1,17 @@
+01-listar-todas: IDENTICO
+02-registrar-certificado: IDENTICO
+03-registrar-urgente-en-minusculas: IDENTICO
+04-registrar-urgente-plazo-minimo-y-si-no-es-urgente: IDENTICO
+05-registrar-con-errores-de-validacion: IDENTICO
+06-asignar-responsable-y-errores: IDENTICO
+07-cambiar-estado-flujo-completo: IDENTICO
+08-cambiar-estado-transiciones-invalidas: IDENTICO
+09-buscar-por-estado-y-por-tipo: IDENTICO
+10-buscar-combinado-vencidas-y-sin-resultados: IDENTICO
+11-reporte: IDENTICO
+12-flujo-completo-con-reporte: IDENTICO
+13-opciones-inexistentes: IDENTICO
+14-sin-solicitudes: IDENTICO
+15-sin-archivo-y-primer-registro: IDENTICO
+16-asignar-y-cambiar-en-solicitud-nueva: IDENTICO
+17-reporte-con-solicitudes-nuevas-resueltas-hoy: IDENTICO

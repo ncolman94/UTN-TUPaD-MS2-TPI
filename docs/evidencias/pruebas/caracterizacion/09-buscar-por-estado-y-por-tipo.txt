@@ -1,0 +1,66 @@
+Escenario: 09-buscar-por-estado-y-por-tipo
+Resultado: IDENTICO
+Entrada: 4 | pendiente |  |  |  | n | 4 |  | EQUIVALENCIA |  |  | N | 4 |  |  |  | media | n | 0
+Codigo de salida (inicial / actual): 0 / 0
+
+----- Salida de la version actual -----
+
+===== GESTION DE SOLICITUDES ACADEMICAS =====
+1. Registrar solicitud
+2. Asignar responsable
+3. Cambiar estado
+4. Buscar solicitudes
+5. Reporte
+6. Listar todas
+0. Salir
+Opcion: Estado (enter para omitir): Tipo (enter para omitir): Legajo (enter para omitir): Prioridad (enter para omitir): Solo vencidas (s/n): Se encontraron 3 solicitudes:
+#4 | EXAMEN | MEDIA | PENDIENTE | Leg: 1001 | Resp: - | Vence: 07/11/2026 | Constancia de examen final para presentar en el trabajo
+#6 | CERTIFICADO | BAJA | PENDIENTE | Leg: 1005 | Resp: - | Vence: 31/10/2026 | Certificado de materias aprobadas
+#8 | EQUIVALENCIA | MEDIA | PENDIENTE | Leg: 1003 | Resp: - | Vence: 04/12/2026 | Equivalencia de Ingles I
+
+===== GESTION DE SOLICITUDES ACADEMICAS =====
+1. Registrar solicitud
+2. Asignar responsable
+3. Cambiar estado
+4. Buscar solicitudes
+5. Reporte
+6. Listar todas
+0. Salir
+Opcion: Estado (enter para omitir): Tipo (enter para omitir): Legajo (enter para omitir): Prioridad (enter para omitir): Solo vencidas (s/n): Se encontraron 2 solicitudes:
+#2 | EQUIVALENCIA | MEDIA | EN_PROCESO | Leg: 1002 | Resp: R03 | Vence: 04/11/2026 | Equivalencia de Matematica I cursada en otra universidad
+#8 | EQUIVALENCIA | MEDIA | PENDIENTE | Leg: 1003 | Resp: - | Vence: 04/12/2026 | Equivalencia de Ingles I
+
+===== GESTION DE SOLICITUDES ACADEMICAS =====
+1. Registrar solicitud
+2. Asignar responsable
+3. Cambiar estado
+4. Buscar solicitudes
+5. Reporte
+6. Listar todas
+0. Salir
+Opcion: Estado (enter para omitir): Tipo (enter para omitir): Legajo (enter para omitir): Prioridad (enter para omitir): Solo vencidas (s/n): Se encontraron 4 solicitudes:
+#2 | EQUIVALENCIA | MEDIA | EN_PROCESO | Leg: 1002 | Resp: R03 | Vence: 04/11/2026 | Equivalencia de Matematica I cursada en otra universidad
+#4 | EXAMEN | MEDIA | PENDIENTE | Leg: 1001 | Resp: - | Vence: 07/11/2026 | Constancia de examen final para presentar en el trabajo
+#7 | EXAMEN | MEDIA | RESUELTA | Leg: 1002 | Resp: R02 | Vence: 15/10/2026 | Constancia de inscripcion a mesa de diciembre
+#8 | EQUIVALENCIA | MEDIA | PENDIENTE | Leg: 1003 | Resp: - | Vence: 04/12/2026 | Equivalencia de Ingles I
+
+===== GESTION DE SOLICITUDES ACADEMICAS =====
+1. Registrar solicitud
+2. Asignar responsable
+3. Cambiar estado
+4. Buscar solicitudes
+5. Reporte
+6. Listar todas
+0. Salir
+Opcion: Hasta luego
+
+----- datos/solicitudes.csv de la version actual -----
+id;legajo;tipo;descripcion;prioridad;estado;responsable;fechaAlta;fechaVencimiento;fechaCierre
+1;1001;CERTIFICADO;Certificado de alumno regular para la obra social;BAJA;RESUELTA;R01;01/10/2026;04/10/2026;03/10/2026
+2;1002;EQUIVALENCIA;Equivalencia de Matematica I cursada en otra universidad;MEDIA;EN_PROCESO;R03;05/10/2026;04/11/2026;
+3;1003;REVISION;Revision de nota del segundo parcial de Programacion II;ALTA;EN_PROCESO;R04;20/10/2026;30/10/2026;
+4;1001;EXAMEN;Constancia de examen final para presentar en el trabajo;MEDIA;PENDIENTE;;02/11/2026;07/11/2026;
+5;1004;BAJA;Baja de la materia Base de Datos I;ALTA;RECHAZADA;R02;15/10/2026;22/10/2026;16/10/2026
+6;1005;CERTIFICADO;Certificado de materias aprobadas;BAJA;PENDIENTE;;28/10/2026;31/10/2026;
+7;1002;EXAMEN;Constancia de inscripcion a mesa de diciembre;MEDIA;RESUELTA;R02;10/10/2026;15/10/2026;14/10/2026
+8;1003;EQUIVALENCIA;Equivalencia de Ingles I;MEDIA;PENDIENTE;;04/11/2026;04/12/2026;
