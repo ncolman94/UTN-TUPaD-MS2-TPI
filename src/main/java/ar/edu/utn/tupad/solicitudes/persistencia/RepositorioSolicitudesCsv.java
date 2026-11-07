@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +26,9 @@ public class RepositorioSolicitudesCsv implements RepositorioSolicitudes {
     private static final String ENCABEZADO =
             "id;legajo;tipo;descripcion;prioridad;estado;responsable;fechaAlta;fechaVencimiento;fechaCierre";
     private static final String SIN_VALOR = "";
-    private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    /** Estricto: una fecha que no existe (31/02) se rechaza en lugar de ajustarse en silencio. */
+    private static final DateTimeFormatter FORMATO_FECHA =
+            DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(ResolverStyle.STRICT);
 
     private final ArchivoCsv archivo;
     private final List<Solicitud> solicitudes;

@@ -14,7 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -69,7 +68,7 @@ class RepositorioSolicitudesCsvTest extends ContratoRepositorioSolicitudes {
     }
 
     @Test
-    @Disabled("Hallazgo CR-03: el formato dd/MM/yyyy acepta 31/02/2026 y lo convierte en 28/02/2026")
+    @DisplayName("CR-03: una fecha que no existe hace que la linea se ignore con aviso")
     void rechazaFechasQueNoExisten() throws IOException {
         Path archivo = carpeta.resolve("solicitudes.csv");
         Files.write(archivo, List.of(ENCABEZADO,
