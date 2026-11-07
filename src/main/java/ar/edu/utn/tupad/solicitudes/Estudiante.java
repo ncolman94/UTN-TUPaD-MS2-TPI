@@ -1,0 +1,8 @@
+package ar.edu.utn.tupad.solicitudes;
+
+public class Estudiante {
+    public String legajo;
+    public String nombre;
+    public String carrera;
+    public String email;
+}

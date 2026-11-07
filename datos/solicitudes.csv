@@ -1,0 +1,9 @@
+id;legajo;tipo;descripcion;prioridad;estado;responsable;fechaAlta;fechaVencimiento;fechaCierre
+1;1001;CERTIFICADO;Certificado de alumno regular para la obra social;BAJA;RESUELTA;R01;01/10/2026;04/10/2026;03/10/2026
+2;1002;EQUIVALENCIA;Equivalencia de Matematica I cursada en otra universidad;MEDIA;EN_PROCESO;R03;05/10/2026;04/11/2026;
+3;1003;REVISION;Revision de nota del segundo parcial de Programacion II;ALTA;EN_PROCESO;R04;20/10/2026;30/10/2026;
+4;1001;EXAMEN;Constancia de examen final para presentar en el trabajo;MEDIA;PENDIENTE;;02/11/2026;07/11/2026;
+5;1004;BAJA;Baja de la materia Base de Datos I;ALTA;RECHAZADA;R02;15/10/2026;22/10/2026;16/10/2026
+6;1005;CERTIFICADO;Certificado de materias aprobadas;BAJA;PENDIENTE;;28/10/2026;31/10/2026;
+7;1002;EXAMEN;Constancia de inscripcion a mesa de diciembre;MEDIA;RESUELTA;R02;10/10/2026;15/10/2026;14/10/2026
+8;1003;EQUIVALENCIA;Equivalencia de Ingles I;MEDIA;PENDIENTE;;04/11/2026;04/12/2026;
