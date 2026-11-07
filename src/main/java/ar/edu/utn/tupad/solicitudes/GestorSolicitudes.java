@@ -1,8 +1,13 @@
 package ar.edu.utn.tupad.solicitudes;
 
 import ar.edu.utn.tupad.solicitudes.dominio.Area;
+import ar.edu.utn.tupad.solicitudes.dominio.DatosDeSolicitud;
 import ar.edu.utn.tupad.solicitudes.dominio.EstadoSolicitud;
+import ar.edu.utn.tupad.solicitudes.dominio.Estudiante;
+import ar.edu.utn.tupad.solicitudes.dominio.Pedido;
 import ar.edu.utn.tupad.solicitudes.dominio.Prioridad;
+import ar.edu.utn.tupad.solicitudes.dominio.Responsable;
+import ar.edu.utn.tupad.solicitudes.dominio.Solicitud;
 import ar.edu.utn.tupad.solicitudes.dominio.TipoSolicitud;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -10,10 +15,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalDouble;
 
 /**
  * Gestiona las solicitudes academicas: carga y guarda los archivos, aplica las reglas de negocio
@@ -50,20 +55,12 @@ public class GestorSolicitudes {
             System.out.println("Error: " + error);
             return;
         }
-        LocalDate hoy = LocalDate.now();
-        Solicitud solicitud = new Solicitud();
-        solicitud.id = proximoNumero();
-        solicitud.legajo = legajo;
-        solicitud.tipo = tipo.orElseThrow();
-        solicitud.desc = descripcion.trim();
-        solicitud.prioridad = solicitud.tipo.prioridad(urgente);
-        solicitud.estado = EstadoSolicitud.PENDIENTE;
-        solicitud.fechaAlta = hoy;
-        solicitud.fechaVto = hoy.plusDays(solicitud.tipo.plazoEnDias(urgente));
+        Pedido pedido = new Pedido(legajo, tipo.orElseThrow(), descripcion.trim(), urgente);
+        Solicitud solicitud = Solicitud.registrar(proximoNumero(), pedido, LocalDate.now());
         solicitudes.add(solicitud);
         guardar();
-        System.out.println("Solicitud #" + solicitud.id + " registrada. Prioridad: " + solicitud.prioridad
-                + ". Vence: " + solicitud.fechaVto.format(FORMATO_FECHA));
+        System.out.println("Solicitud #" + solicitud.numero() + " registrada. Prioridad: " + solicitud.prioridad()
+                + ". Vence: " + solicitud.fechaDeVencimiento().format(FORMATO_FECHA));
     }
 
     public void asignarResponsable(int numero, String idResponsable) {
@@ -77,18 +74,19 @@ public class GestorSolicitudes {
             System.out.println("Error: no existe el responsable " + idResponsable);
             return;
         }
-        if (estaCerrada(solicitud)) {
+        if (solicitud.estaCerrada()) {
             System.out.println("Error: la solicitud #" + numero + " ya esta cerrada");
             return;
         }
-        Area areaRequerida = solicitud.tipo.area();
-        if (!responsable.area.equals(areaRequerida.etiqueta())) {
-            System.out.println("Error: " + responsable.nombre + " no pertenece al area " + areaRequerida.etiqueta());
+        Area areaRequerida = solicitud.tipo().area();
+        if (!responsable.perteneceA(areaRequerida)) {
+            System.out.println("Error: " + responsable.nombre() + " no pertenece al area " + areaRequerida.etiqueta());
             return;
         }
-        solicitud.responsable = responsable.id;
+        solicitud.asignar(responsable);
         guardar();
-        System.out.println("Solicitud #" + numero + " asignada a " + responsable.nombre + " (" + responsable.area + ")");
+        System.out.println("Solicitud #" + numero + " asignada a " + responsable.nombre() + " ("
+                + responsable.area().etiqueta() + ")");
     }
 
     public void cambiarEstado(int numero, String estadoIngresado) {
@@ -97,27 +95,24 @@ public class GestorSolicitudes {
             System.out.println("Error: no existe la solicitud #" + numero);
             return;
         }
-        if (estaCerrada(solicitud)) {
+        if (solicitud.estaCerrada()) {
             System.out.println("Error: la solicitud #" + numero + " ya esta cerrada");
             return;
         }
         Optional<EstadoSolicitud> destino = EstadoSolicitud.desde(estadoIngresado);
-        if (solicitud.estado == EstadoSolicitud.PENDIENTE && destino.equals(Optional.of(EstadoSolicitud.EN_PROCESO))
-                && !tieneResponsable(solicitud)) {
+        if (solicitud.estado() == EstadoSolicitud.PENDIENTE && destino.equals(Optional.of(EstadoSolicitud.EN_PROCESO))
+                && !solicitud.tieneResponsable()) {
             System.out.println("Error: la solicitud debe tener un responsable asignado");
             return;
         }
-        if (destino.isEmpty() || !solicitud.estado.puedePasarA(destino.get())) {
-            System.out.println("Error: no se puede pasar de " + solicitud.estado + " a "
+        if (destino.isEmpty() || !solicitud.estado().puedePasarA(destino.get())) {
+            System.out.println("Error: no se puede pasar de " + solicitud.estado() + " a "
                     + EstadoSolicitud.normalizar(estadoIngresado));
             return;
         }
-        solicitud.estado = destino.get();
-        if (solicitud.estado.estaCerrada()) {
-            solicitud.fechaCierre = LocalDate.now();
-        }
+        solicitud.cambiarEstado(destino.get(), LocalDate.now());
         guardar();
-        System.out.println("Solicitud #" + numero + ": estado actualizado a " + solicitud.estado);
+        System.out.println("Solicitud #" + numero + ": estado actualizado a " + solicitud.estado());
     }
 
     public void buscar(String estado, String tipo, String legajo, String prioridad, boolean soloVencidas) {
@@ -151,17 +146,18 @@ public class GestorSolicitudes {
         System.out.println("Total de solicitudes: " + solicitudes.size());
         System.out.println("-- Por estado --");
         for (EstadoSolicitud estado : EstadoSolicitud.values()) {
-            System.out.println(estado + ": " + contarPorEstado(estado));
+            System.out.println(estado + ": " + solicitudes.stream().filter(s -> s.estado() == estado).count());
         }
         System.out.println("-- Por tipo --");
         for (TipoSolicitud tipo : TipoSolicitud.values()) {
-            System.out.println(tipo + ": " + contarPorTipo(tipo));
+            System.out.println(tipo + ": " + solicitudes.stream().filter(s -> s.tipo() == tipo).count());
         }
         System.out.println("-- Por area --");
         for (Area area : Area.values()) {
-            System.out.println(area.etiqueta() + ": " + contarPorArea(area));
+            System.out.println(area.etiqueta() + ": "
+                    + solicitudes.stream().filter(s -> s.tipo().area() == area).count());
         }
-        System.out.println("Vencidas sin resolver: " + contarVencidas(hoy));
+        System.out.println("Vencidas sin resolver: " + solicitudes.stream().filter(s -> s.estaVencida(hoy)).count());
         System.out.println("Tiempo promedio de resolucion: " + promedioDeResolucionComoTexto());
     }
 
@@ -184,25 +180,13 @@ public class GestorSolicitudes {
         return null;
     }
 
-    private boolean estaCerrada(Solicitud solicitud) {
-        return solicitud.estado.estaCerrada();
-    }
-
-    private boolean estaVencida(Solicitud solicitud, LocalDate hoy) {
-        return solicitud.estado.estaAbierta() && solicitud.fechaVto.isBefore(hoy);
-    }
-
-    private boolean tieneResponsable(Solicitud solicitud) {
-        return solicitud.responsable != null;
-    }
-
     private boolean cumpleFiltro(Solicitud solicitud, String estado, String tipo, String legajo, String prioridad,
                                  boolean soloVencidas, LocalDate hoy) {
-        return coincideSinMayusculas(estado, solicitud.estado.name())
-                && coincideSinMayusculas(tipo, solicitud.tipo.name())
-                && (sinCriterio(legajo) || solicitud.legajo.equals(legajo))
-                && coincideSinMayusculas(prioridad, solicitud.prioridad.name())
-                && (!soloVencidas || estaVencida(solicitud, hoy));
+        return coincideSinMayusculas(estado, solicitud.estado().name())
+                && coincideSinMayusculas(tipo, solicitud.tipo().name())
+                && (sinCriterio(legajo) || solicitud.legajo().equals(legajo))
+                && coincideSinMayusculas(prioridad, solicitud.prioridad().name())
+                && (!soloVencidas || solicitud.estaVencida(hoy));
     }
 
     private boolean coincideSinMayusculas(String criterio, String valor) {
@@ -213,65 +197,31 @@ public class GestorSolicitudes {
         return criterio == null || criterio.isEmpty();
     }
 
-    // ---------------------------------------------------------------- reporte
-
-    private long contarPorEstado(EstadoSolicitud estado) {
-        return solicitudes.stream().filter(s -> s.estado == estado).count();
-    }
-
-    private long contarPorTipo(TipoSolicitud tipo) {
-        return solicitudes.stream().filter(s -> s.tipo == tipo).count();
-    }
-
-    private long contarPorArea(Area area) {
-        return solicitudes.stream().filter(s -> s.tipo.area() == area).count();
-    }
-
-    private long contarVencidas(LocalDate hoy) {
-        return solicitudes.stream().filter(s -> estaVencida(s, hoy)).count();
-    }
-
     private String promedioDeResolucionComoTexto() {
-        long resueltas = 0;
-        long diasTotales = 0;
-        for (Solicitud solicitud : solicitudes) {
-            if (solicitud.estado == EstadoSolicitud.RESUELTA) {
-                diasTotales += ChronoUnit.DAYS.between(solicitud.fechaAlta, solicitud.fechaCierre);
-                resueltas++;
-            }
-        }
-        if (resueltas == 0) {
-            return "sin datos";
-        }
-        return String.format("%.1f", (double) diasTotales / resueltas) + " dias";
+        OptionalDouble promedio = solicitudes.stream()
+                .map(Solicitud::diasDeResolucion)
+                .filter(dias -> dias.isPresent())
+                .mapToLong(dias -> dias.getAsLong())
+                .average();
+        return promedio.isPresent() ? String.format("%.1f", promedio.getAsDouble()) + " dias" : "sin datos";
     }
 
     // ---------------------------------------------------------------- busquedas
 
     private Solicitud buscarSolicitud(int numero) {
-        for (Solicitud solicitud : solicitudes) {
-            if (solicitud.id == numero) {
-                return solicitud;
-            }
-        }
-        return null;
+        return solicitudes.stream().filter(s -> s.numero() == numero).findFirst().orElse(null);
     }
 
     private Responsable buscarResponsable(String idResponsable) {
-        for (Responsable responsable : responsables) {
-            if (responsable.id.equalsIgnoreCase(idResponsable)) {
-                return responsable;
-            }
-        }
-        return null;
+        return responsables.stream().filter(r -> r.id().equalsIgnoreCase(idResponsable)).findFirst().orElse(null);
     }
 
     private boolean existeEstudiante(String legajo) {
-        return estudiantes.stream().anyMatch(e -> e.legajo.equals(legajo));
+        return estudiantes.stream().anyMatch(e -> e.legajo().equals(legajo));
     }
 
     private int proximoNumero() {
-        return solicitudes.stream().mapToInt(s -> s.id).max().orElse(0) + 1;
+        return solicitudes.stream().mapToInt(Solicitud::numero).max().orElse(0) + 1;
     }
 
     // ---------------------------------------------------------------- presentacion
@@ -283,10 +233,10 @@ public class GestorSolicitudes {
     }
 
     private String formatearLinea(Solicitud solicitud) {
-        String responsable = tieneResponsable(solicitud) ? solicitud.responsable : "-";
-        return "#" + solicitud.id + " | " + solicitud.tipo + " | " + solicitud.prioridad + " | " + solicitud.estado
-                + " | Leg: " + solicitud.legajo + " | Resp: " + responsable + " | Vence: "
-                + solicitud.fechaVto.format(FORMATO_FECHA) + " | " + solicitud.desc;
+        return "#" + solicitud.numero() + " | " + solicitud.tipo() + " | " + solicitud.prioridad() + " | "
+                + solicitud.estado() + " | Leg: " + solicitud.legajo() + " | Resp: "
+                + solicitud.idResponsable().orElse("-") + " | Vence: "
+                + solicitud.fechaDeVencimiento().format(FORMATO_FECHA) + " | " + solicitud.descripcion();
     }
 
     // ---------------------------------------------------------------- archivos
@@ -295,12 +245,7 @@ public class GestorSolicitudes {
         try {
             for (String linea : leerLineasDeDatos(ARCHIVO_ESTUDIANTES)) {
                 String[] campos = linea.split(SEPARADOR);
-                Estudiante estudiante = new Estudiante();
-                estudiante.legajo = campos[0];
-                estudiante.nombre = campos[1];
-                estudiante.carrera = campos[2];
-                estudiante.email = campos[3];
-                estudiantes.add(estudiante);
+                estudiantes.add(new Estudiante(campos[0], campos[1], campos[2], campos[3]));
             }
         } catch (IOException | RuntimeException e) {
             // Igual que la version inicial: ante el primer error se deja de leer (defecto E3).
@@ -311,11 +256,7 @@ public class GestorSolicitudes {
         try {
             for (String linea : leerLineasDeDatos(ARCHIVO_RESPONSABLES)) {
                 String[] campos = linea.split(SEPARADOR);
-                Responsable responsable = new Responsable();
-                responsable.id = campos[0];
-                responsable.nombre = campos[1];
-                responsable.area = campos[2];
-                responsables.add(responsable);
+                responsables.add(new Responsable(campos[0], campos[1], Area.desdeEtiqueta(campos[2])));
             }
         } catch (IOException | RuntimeException e) {
             // Igual que la version inicial: ante el primer error se deja de leer (defecto E3).
@@ -325,26 +266,22 @@ public class GestorSolicitudes {
     private void cargarSolicitudes() {
         try {
             for (String linea : leerLineasDeDatos(ARCHIVO_SOLICITUDES)) {
-                solicitudes.add(solicitudDesde(linea.split(SEPARADOR, -1)));
+                solicitudes.add(Solicitud.restaurar(datosDesde(linea.split(SEPARADOR, -1))));
             }
         } catch (IOException | RuntimeException e) {
             // Igual que la version inicial: ante el primer error se deja de leer (defecto E3).
         }
     }
 
-    private Solicitud solicitudDesde(String[] campos) {
-        Solicitud solicitud = new Solicitud();
-        solicitud.id = Integer.parseInt(campos[0]);
-        solicitud.legajo = campos[1];
-        solicitud.tipo = TipoSolicitud.valueOf(campos[2]);
-        solicitud.desc = campos[3];
-        solicitud.prioridad = Prioridad.valueOf(campos[4]);
-        solicitud.estado = EstadoSolicitud.valueOf(campos[5]);
-        solicitud.responsable = campos[6].isEmpty() ? null : campos[6];
-        solicitud.fechaAlta = LocalDate.parse(campos[7], FORMATO_FECHA);
-        solicitud.fechaVto = LocalDate.parse(campos[8], FORMATO_FECHA);
-        solicitud.fechaCierre = campos[9].isEmpty() ? null : LocalDate.parse(campos[9], FORMATO_FECHA);
-        return solicitud;
+    private DatosDeSolicitud datosDesde(String[] campos) {
+        return new DatosDeSolicitud(Integer.parseInt(campos[0]), campos[1], TipoSolicitud.valueOf(campos[2]),
+                campos[3], Prioridad.valueOf(campos[4]), EstadoSolicitud.valueOf(campos[5]),
+                campos[6].isEmpty() ? null : campos[6], fechaDesde(campos[7]), fechaDesde(campos[8]),
+                fechaDesde(campos[9]));
+    }
+
+    private static LocalDate fechaDesde(String texto) {
+        return texto.isEmpty() ? null : LocalDate.parse(texto, FORMATO_FECHA);
     }
 
     /**
@@ -368,21 +305,22 @@ public class GestorSolicitudes {
         try (FileWriter escritor = new FileWriter(ARCHIVO_SOLICITUDES)) {
             escritor.write(ENCABEZADO_SOLICITUDES + "\n");
             for (Solicitud solicitud : solicitudes) {
-                escritor.write(String.join(SEPARADOR, String.valueOf(solicitud.id), solicitud.legajo,
-                        solicitud.tipo.name(), solicitud.desc, solicitud.prioridad.name(), solicitud.estado.name(),
-                        valorOVacio(solicitud.responsable), solicitud.fechaAlta.format(FORMATO_FECHA),
-                        solicitud.fechaVto.format(FORMATO_FECHA), fechaOVacio(solicitud.fechaCierre)) + "\n");
+                escritor.write(lineaDeArchivo(solicitud.datos()) + "\n");
             }
         } catch (IOException e) {
             System.out.println("Error al guardar");
         }
     }
 
-    private static String valorOVacio(String valor) {
-        return valor == null ? SIN_VALOR : valor;
+    private static String lineaDeArchivo(DatosDeSolicitud datos) {
+        return String.join(SEPARADOR, String.valueOf(datos.numero()), datos.legajo(), datos.tipo().name(),
+                datos.descripcion(), datos.prioridad().name(), datos.estado().name(),
+                datos.idResponsable() == null ? SIN_VALOR : datos.idResponsable(),
+                fechaComoTexto(datos.fechaDeAlta()), fechaComoTexto(datos.fechaDeVencimiento()),
+                fechaComoTexto(datos.fechaDeCierre()));
     }
 
-    private static String fechaOVacio(LocalDate fecha) {
+    private static String fechaComoTexto(LocalDate fecha) {
         return fecha == null ? SIN_VALOR : fecha.format(FORMATO_FECHA);
     }
 }

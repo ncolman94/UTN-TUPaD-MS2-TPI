@@ -1,6 +1,10 @@
 package ar.edu.utn.tupad.solicitudes;
 
+import ar.edu.utn.tupad.solicitudes.dominio.EstadoSolicitud;
+import ar.edu.utn.tupad.solicitudes.dominio.TipoSolicitud;
+import java.util.Arrays;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class App {
 
@@ -57,7 +61,7 @@ public class App {
 
     private void registrarSolicitud() {
         String legajo = preguntar("Legajo: ");
-        String tipo = preguntar("Tipo (CERTIFICADO/EXAMEN/EQUIVALENCIA/REVISION/BAJA): ");
+        String tipo = preguntar("Tipo (" + opciones(TipoSolicitud.values()) + "): ");
         String descripcion = preguntar("Descripcion: ");
         String urgente = preguntar("Urgente (s/n): ");
         gestor.registrarSolicitud(legajo, tipo, descripcion, urgente.equals("s") || urgente.equals("S"));
@@ -71,7 +75,8 @@ public class App {
 
     private void cambiarEstado() {
         int numero = Integer.parseInt(preguntar("Numero de solicitud: "));
-        String estado = preguntar("Nuevo estado (EN_PROCESO/RESUELTA/RECHAZADA): ");
+        String estado = preguntar("Nuevo estado ("
+                + opciones(EstadoSolicitud.destinosPosibles().toArray(EstadoSolicitud[]::new)) + "): ");
         gestor.cambiarEstado(numero, estado);
     }
 
@@ -82,6 +87,10 @@ public class App {
         String prioridad = preguntar("Prioridad (enter para omitir): ");
         String soloVencidas = preguntar("Solo vencidas (s/n): ");
         gestor.buscar(estado, tipo, legajo, prioridad, soloVencidas.equalsIgnoreCase("s"));
+    }
+
+    private static String opciones(Enum<?>[] valores) {
+        return Arrays.stream(valores).map(Enum::name).collect(Collectors.joining("/"));
     }
 
     private String preguntar(String texto) {
