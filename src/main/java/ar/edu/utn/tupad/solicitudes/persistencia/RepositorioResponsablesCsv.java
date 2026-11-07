@@ -6,6 +6,7 @@ import ar.edu.utn.tupad.solicitudes.dominio.Responsable;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /** Responsables leidos de un CSV con columnas id;nombre;area. */
 public class RepositorioResponsablesCsv implements RepositorioResponsables {
@@ -14,8 +15,8 @@ public class RepositorioResponsablesCsv implements RepositorioResponsables {
 
     private final List<Responsable> responsables;
 
-    public RepositorioResponsablesCsv(Path ruta) {
-        this.responsables = new ArchivoCsv(ruta, ENCABEZADO)
+    public RepositorioResponsablesCsv(Path ruta, Consumer<String> avisos) {
+        this.responsables = new ArchivoCsv(ruta, ENCABEZADO, avisos)
                 .leer(campos -> new Responsable(campos[0], campos[1], Area.desdeEtiqueta(campos[2])));
     }
 

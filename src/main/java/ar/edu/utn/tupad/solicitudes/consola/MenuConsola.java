@@ -4,6 +4,7 @@ import ar.edu.utn.tupad.solicitudes.aplicacion.DatosNuevaSolicitud;
 import ar.edu.utn.tupad.solicitudes.aplicacion.FiltroSolicitudes;
 import ar.edu.utn.tupad.solicitudes.aplicacion.GeneradorDeReporte;
 import ar.edu.utn.tupad.solicitudes.aplicacion.ServicioSolicitudes;
+import ar.edu.utn.tupad.solicitudes.dominio.ErrorDePersistencia;
 import ar.edu.utn.tupad.solicitudes.dominio.EstadoSolicitud;
 import ar.edu.utn.tupad.solicitudes.dominio.ReglaDeNegocioException;
 import ar.edu.utn.tupad.solicitudes.dominio.Responsable;
@@ -12,6 +13,7 @@ import ar.edu.utn.tupad.solicitudes.dominio.TipoSolicitud;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 public class MenuConsola {
 
     private static final int OPCION_SALIR = 0;
+    private static final int OPCION_INVALIDA = -1;
     private static final String RESPUESTA_SI = "s";
 
     private final Scanner entrada;
@@ -34,13 +37,18 @@ public class MenuConsola {
         this.generadorDeReporte = generadorDeReporte;
     }
 
+    /** Muestra el menu hasta que el operador elige salir o se termina la entrada. */
     public void iniciar() {
-        int opcion;
-        do {
-            mostrarMenu();
-            opcion = Integer.parseInt(entrada.nextLine());
-            ejecutar(opcion);
-        } while (opcion != OPCION_SALIR);
+        try {
+            int opcion;
+            do {
+                mostrarMenu();
+                opcion = numeroEntero(leerLinea()).orElse(OPCION_INVALIDA);
+                ejecutar(opcion);
+            } while (opcion != OPCION_SALIR);
+        } catch (FinDeEntrada e) {
+            salida.println();
+        }
     }
 
     private void mostrarMenu() {
@@ -70,6 +78,8 @@ public class MenuConsola {
             }
         } catch (ReglaDeNegocioException e) {
             salida.println("Error: " + e.getMessage());
+        } catch (ErrorDePersistencia e) {
+            salida.println("Error al guardar: " + e.getMessage() + ". El cambio no quedo guardado.");
         }
     }
 
@@ -85,7 +95,7 @@ public class MenuConsola {
     }
 
     private void asignarResponsable() {
-        int numero = Integer.parseInt(preguntar("Numero de solicitud: "));
+        int numero = numeroDeSolicitud(preguntar("Numero de solicitud: "));
         String idResponsable = preguntar("Id del responsable: ");
         Responsable responsable = servicio.asignarResponsable(numero, idResponsable);
         salida.println("Solicitud #" + numero + " asignada a " + responsable.nombre() + " ("
@@ -93,7 +103,7 @@ public class MenuConsola {
     }
 
     private void cambiarEstado() {
-        int numero = Integer.parseInt(preguntar("Numero de solicitud: "));
+        int numero = numeroDeSolicitud(preguntar("Numero de solicitud: "));
         String estado = preguntar("Nuevo estado ("
                 + opciones(EstadoSolicitud.destinosPosibles().toArray(EstadoSolicitud[]::new)) + "): ");
         EstadoSolicitud nuevoEstado = servicio.cambiarEstado(numero, estado);
@@ -132,7 +142,32 @@ public class MenuConsola {
 
     private String preguntar(String texto) {
         salida.print(texto);
+        return leerLinea();
+    }
+
+    private String leerLinea() {
+        if (!entrada.hasNextLine()) {
+            throw new FinDeEntrada();
+        }
         return entrada.nextLine();
+    }
+
+    private static int numeroDeSolicitud(String texto) {
+        return numeroEntero(texto).orElseThrow(
+                () -> new ReglaDeNegocioException("el numero de solicitud debe ser un numero entero"));
+    }
+
+    private static OptionalInt numeroEntero(String texto) {
+        try {
+            return OptionalInt.of(Integer.parseInt(texto.trim()));
+        } catch (NumberFormatException e) {
+            return OptionalInt.empty();
+        }
+    }
+
+    /** La entrada se termino (por ejemplo, fin de archivo) antes de elegir "Salir". */
+    private static final class FinDeEntrada extends RuntimeException {
+        private static final long serialVersionUID = 1L;
     }
 
     private static String opciones(Enum<?>[] valores) {

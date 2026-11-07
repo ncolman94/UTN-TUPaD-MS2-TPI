@@ -1,6 +1,7 @@
 package ar.edu.utn.tupad.solicitudes.persistencia;
 
 import ar.edu.utn.tupad.solicitudes.dominio.DatosDeSolicitud;
+import ar.edu.utn.tupad.solicitudes.dominio.ErrorDePersistencia;
 import ar.edu.utn.tupad.solicitudes.dominio.EstadoSolicitud;
 import ar.edu.utn.tupad.solicitudes.dominio.Prioridad;
 import ar.edu.utn.tupad.solicitudes.dominio.RepositorioSolicitudes;
@@ -27,16 +28,13 @@ public class RepositorioSolicitudesCsv implements RepositorioSolicitudes {
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final ArchivoCsv archivo;
-    private final Consumer<String> avisos;
     private final List<Solicitud> solicitudes;
 
     /**
-     * @param avisos recibe el mensaje "Error al guardar" si no se puede escribir el archivo
-     *               (se conserva el comportamiento de la version inicial, defecto E2).
+     * @param avisos recibe un aviso por cada linea del archivo que no se puede leer y se ignora
      */
     public RepositorioSolicitudesCsv(Path ruta, Consumer<String> avisos) {
-        this.archivo = new ArchivoCsv(ruta, ENCABEZADO);
-        this.avisos = avisos;
+        this.archivo = new ArchivoCsv(ruta, ENCABEZADO, avisos);
         this.solicitudes = new ArrayList<>(archivo.leer(RepositorioSolicitudesCsv::desdeCampos));
     }
 
@@ -55,14 +53,18 @@ public class RepositorioSolicitudesCsv implements RepositorioSolicitudes {
         return solicitudes.stream().mapToInt(Solicitud::numero).max().orElse(0) + 1;
     }
 
+    /** Escribe primero el archivo y solo despues actualiza la lista en memoria. */
     @Override
     public void guardar(Solicitud solicitud) {
-        ListaDeSolicitudes.agregarOReemplazar(solicitudes, solicitud);
+        List<Solicitud> actualizadas = new ArrayList<>(solicitudes);
+        ListaDeSolicitudes.agregarOReemplazar(actualizadas, solicitud);
         try {
-            archivo.escribir(solicitudes.stream().map(s -> aCampos(s.datos())).toList());
+            archivo.escribir(actualizadas.stream().map(s -> aCampos(s.datos())).toList());
         } catch (IOException e) {
-            avisos.accept("Error al guardar");
+            throw new ErrorDePersistencia("no se pudo escribir " + archivo.ruta(), e);
         }
+        solicitudes.clear();
+        solicitudes.addAll(actualizadas);
     }
 
     private static Solicitud desdeCampos(String[] campos) {

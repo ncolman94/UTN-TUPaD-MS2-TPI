@@ -10,6 +10,10 @@ public interface RepositorioSolicitudes extends ConsultaSolicitudes {
     /** Numero para la proxima solicitud: el mayor existente mas uno (1 si no hay ninguna). */
     int proximoNumero();
 
-    /** Agrega la solicitud o reemplaza la que tenga su mismo numero, y la deja guardada. */
+    /**
+     * Agrega la solicitud o reemplaza la que tenga su mismo numero, y la deja guardada.
+     *
+     * @throws ErrorDePersistencia si no se pudo guardar; en ese caso una solicitud nueva no se agrega
+     */
     void guardar(Solicitud solicitud);
 }

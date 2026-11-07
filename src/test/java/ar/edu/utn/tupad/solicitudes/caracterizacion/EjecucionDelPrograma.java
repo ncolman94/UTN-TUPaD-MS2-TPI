@@ -85,7 +85,13 @@ final class EjecucionDelPrograma {
         /** Estudiantes y responsables de ejemplo, solicitudes.csv solo con el encabezado. */
         SIN_SOLICITUDES,
         /** Estudiantes y responsables de ejemplo, sin el archivo solicitudes.csv. */
-        SIN_ARCHIVO_DE_SOLICITUDES;
+        SIN_ARCHIVO_DE_SOLICITUDES,
+        /** Datos de ejemplo con solicitudes.csv de solo lectura: cualquier guardado falla. */
+        SOLICITUDES_DE_SOLO_LECTURA,
+        /** Datos de ejemplo con una linea mal formada despues de la solicitud #3. */
+        CON_LINEA_MAL_FORMADA;
+
+        static final String LINEA_MAL_FORMADA = "XX;linea;danada";
 
         private static final Path DATOS_DEL_PROYECTO = Path.of("datos");
 
@@ -102,6 +108,12 @@ final class EjecucionDelPrograma {
                 Files.writeString(solicitudes, encabezado + "\n", StandardCharsets.UTF_8);
             } else if (this == SIN_ARCHIVO_DE_SOLICITUDES) {
                 Files.delete(solicitudes);
+            } else if (this == SOLICITUDES_DE_SOLO_LECTURA) {
+                solicitudes.toFile().setWritable(false);
+            } else if (this == CON_LINEA_MAL_FORMADA) {
+                List<String> lineas = new java.util.ArrayList<>(Files.readAllLines(solicitudes, StandardCharsets.UTF_8));
+                lineas.add(4, LINEA_MAL_FORMADA);
+                Files.write(solicitudes, lineas, StandardCharsets.UTF_8);
             }
         }
     }
