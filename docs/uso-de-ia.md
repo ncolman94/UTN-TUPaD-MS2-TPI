@@ -53,7 +53,7 @@ verificó antes de seguir.
 | 6 | Un commit se hizo con una prueba en rojo, porque el comando tomaba el código de salida de `grep` y no el de Maven | Lectura del resultado (`BUILD FAILURE`) | Se corrigió con `--amend` y desde ahí se verificó el código de salida de Maven antes de cada commit |
 | 7 | Se suponía que las fechas inválidas se rechazaban | Lo contradijo una prueba unitaria (`31/02` se aceptaba) | Observación CR-03 y corrección |
 | 8 | En la revisión se afirmó cómo la versión inicial releía una línea con `;` | Antes de documentarlo se escribió una prueba de dos sesiones que lo comprobó | Evidencia en `CambiosIntencionalesTest` |
-| 9 | El mensaje del commit `d35f480` dice que el checklist tiene 30 ítems; tiene 29 | Al contar los ítems para la presentación | Los documentos dicen 29; el mensaje de commit no se reescribió para no cambiar los hashes citados en la documentación |
+| 9 | El mensaje del commit `d35f480` dice que el checklist tiene 30 ítems; tiene 29 | Al contar los ítems para la presentación | Los documentos dicen 29; el mensaje del commit quedó con el error, que se registra acá |
 
 Conclusión: la herramienta acelera mucho el trabajo, pero produce errores con total seguridad. Cada afirmación
 del informe está respaldada por una prueba, un reporte de herramienta o un commit que se puede revisar.

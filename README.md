@@ -8,7 +8,8 @@ técnica*.
 |---|---|
 | Comisión | 11 |
 | Docente | Naveda, Claudia |
-| Integrantes | Cisneros, Luis · Caiciia Massello, Santiago · Colman, Nicolás Alberto |
+| Integrantes | Cisneros, Luis ([luiscisneros356](https://github.com/luiscisneros356)) · Caiciia Massello, Santiago ([scaiciia](https://github.com/scaiciia)) · Colman, Nicolás Alberto ([ncolman94](https://github.com/ncolman94)) |
+| Forma de trabajo | Sesión conjunta en la PC de Nicolás. El autor de cada commit es el integrante a cargo de esa parte y los otros dos figuran como coautores (`Co-authored-by`) |
 | Video | [agregar enlace al video] |
 
 ## Descripción
