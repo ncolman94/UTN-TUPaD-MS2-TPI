@@ -16,7 +16,7 @@ de salida y los tres CSV (golden master). Validar la red inyectando un error a p
 - **Escribir primero pruebas unitarias:** obligaba a modificar el código para poder probarlo, sin red.
 - **Guardar salidas esperadas fijas en archivos:** dependen de la fecha (vencimientos); comparar contra la versión
   inicial en la misma ejecución evita ese problema.
-- **Probar a mano el menú:** no es repetible ni escala a 9 pasos de refactoring.
+- **Probar a mano el menú:** no es repetible ni escala a 8 refactorings.
 
 ## Consecuencias
 - Cada commit de refactoring se verificó con 17/17 escenarios idénticos.

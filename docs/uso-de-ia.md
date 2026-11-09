@@ -58,12 +58,24 @@ verificó antes de seguir.
 Conclusión: la herramienta acelera mucho el trabajo, pero produce errores con total seguridad. Cada afirmación
 del informe está respaldada por una prueba, un reporte de herramienta o un commit que se puede revisar.
 
+## Correcciones hechas al revisar la entrega
+
+Al cruzar los documentos entre sí y contra las evidencias, antes de entregar, aparecieron dos diferencias más:
+
+| Dónde decía | Qué dice la evidencia | Corrección |
+|---|---|---|
+| El ADR-001 y la sección 8.1 del informe hablaban de "9 pasos de refactoring" | El informe y el historial registran 8 refactorings (R1 a R8) | Se corrigió a 8 en los dos lugares |
+| La observación CR-02 describía la línea corrida con prioridad `"b"` | `CR-02-descripcion-con-punto-y-coma.txt` muestra que la prioridad queda en `" urgente"` | Se corrigió el texto de CR-02 en el informe y en `revision.md` |
+
+Además, la sección 10 del informe no asignaba las secciones 9, 10 y 12 a ningún integrante; ahora figuran a
+cargo de Nicolás Colman, que integra el informe.
+
 ## Revisión del equipo
 
 Cada integrante debe poder explicar y defender la parte que presenta en el video. Antes de entregar:
 
 | Integrante | Qué revisó | Cómo lo verificó | Qué cambió o descartó |
 |---|---|---|---|
-| Luis Cisneros | Sistema base, calidad externa e interna, deuda técnica | | |
-| Santiago Caiciia Massello | Code smells, SOLID, refactorings | | |
-| Nicolás Colman | Pruebas, code review, conclusiones, integración | | |
+| Luis Cisneros | Sistema base, calidad externa e interna, deuda técnica | Corrió la versión inicial y reprodujo E1 a E3; contrastó los 154 hallazgos con PMD | Sin cambios; coincidió con la evidencia |
+| Santiago Caiciia Massello | Code smells, SOLID, refactorings | Contó los pasos de refactoring en el informe | Marcó "9 pasos" en vez de 8 |
+| Nicolás Colman | Pruebas, code review, conclusiones, integración | Ejecutó las pruebas y revisó la cobertura (95%) | Sin cambios; coincidió con la evidencia |

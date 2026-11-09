@@ -3,7 +3,7 @@
 | Dato | Valor |
 |---|---|
 | Cambio revisado | `etapa-diagnostico..etapa-pruebas` (red de seguridad, R1 a R8, corrección de E1 a E3 y pruebas) |
-| Autor de los cambios | Nicolás Colman |
+| Autor de los cambios | Nicolás Colman, Santiago Caiciia Massello y Luis Cisneros |
 | Revisores | Luis Cisneros (bloques A y B) y Santiago Caiciia Massello (bloques C, D y E); bloque F entre los tres |
 | Checklist | [checklist.md](checklist.md) |
 | Herramientas | `./mvnw verify` (JUnit 5 + JaCoCo), PMD 7 con [reglas de diseño](../../config/pmd/reglas-diseno.xml), lectura del diff |
@@ -50,7 +50,7 @@ PMD sobre el código revisado: **6 hallazgos** (eran 154). Se tratan en CR-01, C
 | Id | Severidad | Ítem | Dónde | Observación y por qué importa | Propuesta | Estado |
 |---|---|---|---|---|---|---|
 | CR-01 | Menor | B3 | `MenuConsola` l. 93, 101, 110 | El texto "Solicitud #" está repetido 3 veces (PMD). Si cambia el formato del número, hay que acordarse de los tres | Extraer un método que arme la referencia a la solicitud | Corregida en `23efc13` |
-| CR-02 | **Mayor** | E3 | `ArchivoCsv.escribir` l. 63 | Los campos se unen con `;` sin escapar. Una descripción con `;` genera una línea de 11 columnas. La versión inicial la vuelve a leer corrida (prioridad "b", estado "MEDIA", responsable "PENDIENTE") y la actual la descarta: en los dos casos **se pierde la solicitud**. El defecto viene de la versión inicial | Rechazar `;` en la descripción con un mensaje claro, como regla de `Pedido`. Se prefiere a escapar el campo porque no cambia el formato del archivo | Corregida en `a09eaa7` |
+| CR-02 | **Mayor** | E3 | `ArchivoCsv.escribir` l. 63 | Los campos se unen con `;` sin escapar. Una descripción con `;` genera una línea de 11 columnas. La versión inicial la vuelve a leer corrida (prioridad " urgente", estado "MEDIA", responsable "PENDIENTE") y la actual la descarta: en los dos casos **se pierde la solicitud**. El defecto viene de la versión inicial | Rechazar `;` en la descripción con un mensaje claro, como regla de `Pedido`. Se prefiere a escapar el campo porque no cambia el formato del archivo | Corregida en `a09eaa7` |
 | CR-03 | **Mayor** | E3 | `RepositorioSolicitudesCsv` l. 28 | `dd/MM/yyyy` usa el modo SMART de Java: `31/02/2026` se lee como `28/02/2026` sin aviso. Lo detectó la prueba `rechazaFechasQueNoExisten`, que quedó deshabilitada | Formato `dd/MM/uuuu` con `ResolverStyle.STRICT`; habilitar la prueba | Corregida en `2a8fe39` |
 | CR-04 | Menor | B6 | `MenuConsola.mostrarMenu` l. 54 y `ejecutar` l. 67 | El texto del menú y el `switch` son dos listas que deben coincidir; una opción nueva obliga a tocar las dos. Además, `ejecutar` tiene complejidad 9 (PMD) | Una tabla de opciones (número, texto, acción) que genere el menú y resuelva la opción elegida | Corregida en `23efc13` |
 | CR-05 | Sugerencia | B2 | `Solicitud.cambiarEstado` l. 62 | La condición `PENDIENTE && EN_PROCESO && !tieneResponsable()` se entiende, pero no dice qué regla expresa (complejidad 8, PMD) | Extraer `requiereResponsable(destino)` | Corregida en `23efc13` |

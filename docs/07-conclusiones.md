@@ -8,7 +8,7 @@ y 0 pruebas. Para agregar un tipo de solicitud había que tocar 8 lugares. La ca
 menú, pero define cuánto cuesta y cuánto riesgo tiene cada cambio.
 
 **2. Sin red de seguridad no hay refactoring, solo cambios.** La decisión más importante fue escribir primero la
-prueba de caracterización y comprobar que detectaba un error inyectado. Con esa red se hicieron 9 pasos de
+prueba de caracterización y comprobar que detectaba un error inyectado. Con esa red se hicieron 8 pasos de
 refactoring con 17 de 17 escenarios idénticos en cada uno. Sin ella, cada paso habría sido una apuesta.
 
 **3. Refactorizar y corregir son trabajos distintos.** Separarlos (ADR-006) permitió afirmar con evidencia que
